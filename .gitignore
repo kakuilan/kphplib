@@ -1,4 +1,4 @@
 .idea
 *.log
-vendor/
+vendor
 composer.lock
