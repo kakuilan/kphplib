@@ -1,0 +1,25 @@
+{
+  "name": "kakuilan/kphplib",
+  "description": "lkk's php library",
+  "keywords": [
+    "php library"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "kakuilan",
+      "email": "kakuilan@163.com"
+    }
+  ],
+  "require": {
+    "phpunit/phpunit": "^6.1"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "psr-4": {
+      "Lkk\\": "src",
+      "Lkk\\Tests\\": "tests"
+    }
+  }
+}
