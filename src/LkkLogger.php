@@ -17,7 +17,7 @@ class LkkLogger {
     private $fileHandle         = null;//日志文件句柄
     private $dateFormat         = 'Y-m-d H:i:s';
     private $prefix             = null;//日志内容前缀
-    public	$logDir             = LOGDIR;//日志目录
+    public	$logDir             = '/var/log/';//日志目录
     public  static $DS          = null; //目录符号
 
     //日志级别
@@ -109,6 +109,15 @@ class LkkLogger {
 
         $this->logDir = $logDirectory;
         $this->logFilePath = $this->logDir . self::$DS . $logFileName;
+    }
+
+
+    /**
+     * 获取日志文件路径
+     * @return null|string
+     */
+    public function getLogFilePath() {
+        return $this->logFilePath;
     }
 
 
