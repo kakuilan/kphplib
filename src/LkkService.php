@@ -12,15 +12,39 @@ namespace Lkk;
 class LkkService extends LkkObject {
 
     protected $errno, $error;
+    protected static $instance;
 
 
+    /**
+     * 构造函数
+     * LkkService constructor.
+     * @param array $vars
+     */
     public function __construct($vars=[]) {
         parent::__construct($vars);
     }
 
 
+    /**
+     * 析构函数
+     */
     public function __destruct() {
 
+    }
+
+
+    /**
+     * 实例化
+     * @param array $vars
+     * @return mixed
+     */
+    public static function instance(array $vars = []) {
+        if(is_null(self::$instance)) {
+            //静态延迟绑定
+            static::$instance = new static($vars);
+        }
+
+        return static::$instance;
     }
 
 
