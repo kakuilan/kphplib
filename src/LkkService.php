@@ -34,17 +34,25 @@ class LkkService extends LkkObject {
 
 
     /**
-     * 实例化
+     * 实例化并返回
      * @param array $vars
      * @return mixed
      */
     public static function instance(array $vars = []) {
-        if(is_null(self::$instance)) {
+        if(is_null(self::$instance) || !is_object(self::$instance)) {
             //静态延迟绑定
             static::$instance = new static($vars);
         }
 
         return static::$instance;
+    }
+
+
+    /**
+     * 销毁实例化对象
+     */
+    public static function destroy() {
+        static::$instance = null;
     }
 
 
