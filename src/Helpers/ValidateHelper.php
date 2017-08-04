@@ -12,6 +12,36 @@ namespace Lkk\Helpers;
 
 class ValidateHelper {
 
+
+    /**
+     * 是否整数
+     * @param $val
+     * @return bool|int
+     */
+    public static function isInteger($val) {
+        if (!is_scalar($val) || is_bool($val)) {
+            return false;
+        }
+        if (is_float($val + 0) && ($val + 0) > PHP_INT_MAX) {
+            return false;
+        }
+        return is_float($val) ? false : preg_match('~^((:?+|-)?[0-9]+)$~', $val);
+    }
+
+
+    /**
+     * 是否浮点数
+     * @param $val
+     * @return bool
+     */
+    public static function isFloat($val) {
+        if (!is_scalar($val)) {
+            return false;
+        }
+        return is_float($val + 0);
+    }
+
+
     /**
      * 是否邮箱
      * @param string $email
