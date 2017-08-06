@@ -333,4 +333,25 @@ class ValidateHelper {
         return strtoupper(substr(PHP_OS,0,3))==='WIN';
     }
 
+
+    /**
+     * 端口是否已绑定
+     * @param string $hostname 主机/IP
+     * @param int    $port 端口
+     * @param int    $timeout 超时
+     *
+     * @return bool
+     */
+    public static function isPortBinded($hostname = '127.0.0.1', $port = 80, $timeout = 5) {
+        $res = false; //端口未绑定
+        $fp	= @fsockopen($hostname, $port, $errno, $errstr, $timeout);
+        if($errno == 0 && $fp!=false){
+            fclose($fp);
+            $res = true; //端口已绑定
+        }
+
+        return $res;
+    }
+
+
 }
