@@ -43,6 +43,18 @@ class ValidateHelper {
 
 
     /**
+     * 是否JSON格式
+     * @param string $str
+     *
+     * @return bool
+     */
+    public static function isJson($str='') {
+        @json_decode($str);
+        return (json_last_error() == JSON_ERROR_NONE);
+    }
+
+
+    /**
      * 是否邮箱
      * @param string $email
      * @param int $minLen 字符串最小长度
