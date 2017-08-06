@@ -2,7 +2,7 @@
   "name": "kakuilan/kphplib",
   "description": "lkk's php library",
   "keywords": [
-    "php library"
+    "php library","redis queue"
   ],
   "license": "MIT",
   "authors": [
