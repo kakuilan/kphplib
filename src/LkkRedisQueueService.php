@@ -22,9 +22,9 @@ class LkkRedisQueueService extends LkkService {
     const REDIS_QUEUE_TRANS_LOCKKEY = 'trans_lock'; //中转队列的锁key
     const REDIS_QUEUE_TRANS_LOCKTIM = 3600; //中转队列的锁时间,秒
 
-    private $redis; //redis客户端对象
-    private $redisConf; //redis配置
-    private $timeout = 2.5;
+    protected $redis; //redis客户端对象
+    protected $redisConf; //redis配置
+    protected $timeout = 2.5;
     private static $prefix = 'que_';
     private static $allQuekeys = []; //当前类用过的所有队列key
     private $curQueName = ''; //当前队列key
