@@ -11,19 +11,19 @@ namespace Lkk;
 
 class LkkRedisQueueService extends LkkService {
 
-    const REDIS_QUEUE_DATABASE = 9; //使用哪个库
-    const REDIS_QUEUE_TYPE_ISSORT = 'issort'; //类型:有序队列(有序集合)
-    const REDIS_QUEUE_TYPE_NOSORT = 'nosort'; //类型:无序队列(列表)
-    const REDIS_QUEUE_SCORE_FIELD = 'queue_score'; //有序列表的分数字段名
-    const REDIS_QUEUE_ALLKEY = 'all_key_table';
-    const REDIS_QUEUE_TRANS_QUEU = 'transfer_que'; //中转队列key
-    const REDIS_QUEUE_TRANS_TABL = 'transfer_tab'; //中转表key
-    const REDIS_QUEUE_TRANS_TIME = 120; //默认的中转队列重新入栈时间,秒
+    const REDIS_QUEUE_DATABASE      = 9; //使用哪个库
+    const REDIS_QUEUE_TYPE_ISSORT   = 'issort'; //类型:有序队列(有序集合)
+    const REDIS_QUEUE_TYPE_NOSORT   = 'nosort'; //类型:无序队列(列表)
+    const REDIS_QUEUE_SCORE_FIELD   = 'queue_score'; //有序列表的分数字段名
+    const REDIS_QUEUE_ALLKEY        = 'all_key_table';
+    const REDIS_QUEUE_TRANS_QUEU    = 'transfer_que'; //中转队列key
+    const REDIS_QUEUE_TRANS_TABL    = 'transfer_tab'; //中转表key
+    const REDIS_QUEUE_TRANS_TIME    = 120; //默认的中转队列重新入栈时间,秒
     const REDIS_QUEUE_TRANS_LOCKKEY = 'trans_lock'; //中转队列的锁key
     const REDIS_QUEUE_TRANS_LOCKTIM = 3600; //中转队列的锁时间,秒
 
-    private $redis;
-    private $redisConf;
+    private $redis; //redis客户端对象
+    private $redisConf; //redis配置
     private $timeout = 2.5;
     private static $prefix = 'que_';
     private static $allQuekeys = []; //当前类用过的所有队列key
@@ -52,14 +52,15 @@ class LkkRedisQueueService extends LkkService {
      * @return \Redis
      */
     public static function getRedisClient($conf=[]) {
-        static $redis;
+        static $redisArr;
+        if(empty($conf)) $conf = [
+            'host' => '127.0.0.1',
+            'port' => 6379,
+            'password' => null,
+        ];
+        $key = md5(json_encode($conf));
 
-        if(is_null($redis)) {
-            if(empty($conf)) $conf = [
-                'host' => '127.0.0.1',
-                'port' => 6379,
-                'password' => null,
-            ];
+        if(is_null($redisArr) || !isset($redisArr[$key])) {
             $redis = new \Redis();
             $redis->connect($conf['host'], $conf['port']);
             if(isset($conf['password']) && !empty($conf['password'])) {
@@ -68,9 +69,11 @@ class LkkRedisQueueService extends LkkService {
 
             $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
             $redis->select(self::REDIS_QUEUE_DATABASE);
+
+            $redisArr[$key] = $redis;
         }
 
-        return $redis;
+        return $redisArr[$key];
     }
 
 
@@ -112,6 +115,30 @@ class LkkRedisQueueService extends LkkService {
     public static function getTransLockKey($serverUniqueId='') {
         $key = self::$prefix . self::REDIS_QUEUE_TRANS_LOCKKEY."_{$serverUniqueId}";
         return $key;
+    }
+
+
+    /**
+     * 获取单个消息的处理key
+     * @param array $item
+     * @param string $queueName
+     * @return string
+     */
+    public static function getItemProcessKey($item=[], $queueName='') {
+        $key = md5(json_encode($item));
+        $key = self::$prefix . "_{$queueName}_{$key}";
+        return $key;
+    }
+
+
+    /**
+     * 重置redis客户端连接
+     * @param array $conf redis配置
+     * @return $this
+     */
+    public function resetRedis(array $conf) {
+        $this->redis = self::getRedisClient($conf);
+        return $this;
     }
 
 
@@ -368,7 +395,7 @@ class LkkRedisQueueService extends LkkService {
         }
 
         if($baseInfo->isSort) {
-            $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : time();
+            $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
             $res = $this->redis->zAdd($baseInfo->queueKey, $score, $item);
         }else{
             $res = $this->redis->lPush($baseInfo->queueKey, $item);
@@ -405,7 +432,7 @@ class LkkRedisQueueService extends LkkService {
         $this->redis->multi();
         foreach ($items as $k=>$item) {
             if($baseInfo->isSort) {
-                $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : ($now+$k);
+                $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
                 $this->redis->zAdd($baseInfo->queueKey, $score, $item);
             }else{
                 $this->redis->lPush($baseInfo->queueKey, $item);
@@ -443,7 +470,7 @@ class LkkRedisQueueService extends LkkService {
         }
 
         if($baseInfo->isSort) {
-            $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : time();
+            $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
             $res = $this->redis->zAdd($baseInfo->queueKey, $score, $item);
         }else{
             $res = $this->redis->rPush($baseInfo->queueKey, $item);
@@ -480,7 +507,7 @@ class LkkRedisQueueService extends LkkService {
         $this->redis->multi();
         foreach ($items as $k=>$item) {
             if($baseInfo->isSort) {
-                $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : ($now+$k);
+                $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
                 $this->redis->zAdd($baseInfo->queueKey, $score, $item);
             }else{
                 $this->redis->rPush($baseInfo->queueKey, $item);
@@ -655,7 +682,7 @@ class LkkRedisQueueService extends LkkService {
         $this->redis->hDel($tranTabKey, $tranItemKey);
         if(!$procRes) { //重新入栈
             if($baseInfo->isSort) {
-                $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : time();
+                $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
                 $res = $this->redis->zAdd($baseInfo->queueKey, $score, $item);
             }else{
                 $res = $this->redis->rPush($baseInfo->queueKey, $item);
@@ -699,13 +726,13 @@ class LkkRedisQueueService extends LkkService {
      * @param string $serverUniqueId 服务器唯一标识
      * @return bool
      */
-    public static function getTransQueueLock($serverUniqueId='') {
+    public function getTransQueueLock($serverUniqueId='') {
         $key = self::getTransLockKey($serverUniqueId);
         $now = time();
-        $redis = self::getRedisClient();
-        $res = $redis->setnx($key, $now);
+
+        $res = $this->redis->setnx($key, $now);
         if($res) {
-            $redis->expire($key, self::REDIS_QUEUE_TRANS_LOCKTIM);
+            $this->redis->expire($key, self::REDIS_QUEUE_TRANS_LOCKTIM);
         }
 
         return $res;
@@ -717,41 +744,27 @@ class LkkRedisQueueService extends LkkService {
      * @param string $serverUniqueId 服务器唯一标识
      * @return int
      */
-    public static function unlockTransQueue($serverUniqueId='') {
+    public function unlockTransQueue($serverUniqueId='') {
         $key = self::getTransLockKey($serverUniqueId);
-        $redis = self::getRedisClient();
-        $res = $redis->del($key);
+        $res = $this->redis->del($key);
         return $res;
-    }
-
-
-    /**
-     * 获取单个消息的处理key
-     * @param array $item
-     * @param string $queueName
-     * @return string
-     */
-    public static function getItemProcessKey($item=[], $queueName='') {
-        $key = md5(json_encode($item));
-        $key = self::$prefix . "_{$queueName}_{$key}";
-        return $key;
     }
 
 
     /**
      * 获取单个消息的处理锁
      * @param array $item 消息
-     * @param string $queueName 队列名
      * @param int $lockTime 锁时间,秒
+     * @param string $queueName 队列名
      * @return bool
      */
-    public static function getItemProcessLock($item=[], $queueName='', $lockTime=30) {
+    public function getItemProcessLock($item=[], $lockTime=30, $queueName='') {
+        if(empty($queueName)) $queueName = $this->curQueName;
         $key = self::getItemProcessKey($item, $queueName);
         $now = time();
-        $redis = self::getRedisClient();
-        $res = $redis->setnx($key, $now);
+        $res = $this->redis->setnx($key, $now);
         if($res) {
-            $redis->expire($key, $lockTime);
+            $this->redis->expire($key, $lockTime);
         }
 
         return $res;
@@ -760,14 +773,14 @@ class LkkRedisQueueService extends LkkService {
 
     /**
      * 解锁单个消息的处理
-     * @param array $item
-     * @param string $queueName
+     * @param array $item 消息
+     * @param string $queueName 队列名
      * @return int
      */
-    public static function unlockItemProcess($item=[], $queueName='') {
+    public function unlockItemProcess($item=[], $queueName='') {
+        if(empty($queueName)) $queueName = $this->curQueName;
         $key = self::getItemProcessKey($item, $queueName);
-        $redis = self::getRedisClient();
-        $res = $redis->del($key);
+        $res = $this->redis->del($key);
         return $res;
     }
 
@@ -779,7 +792,7 @@ class LkkRedisQueueService extends LkkService {
      */
     public function loopTransQueue($serverUniqueId='') {
         $res = false;
-        $lock = self::getTransQueueLock($serverUniqueId);
+        $lock = $this->getTransQueueLock($serverUniqueId);
         if(!$lock) {
             $this->setError('已有其他进程正执行中转队列');
             return $res;
@@ -790,7 +803,7 @@ class LkkRedisQueueService extends LkkService {
         $len = (int)$this->redis->hLen($tranTabKey);
         if($len<=0) {
             $this->setError('中转队列为空');
-            self::unlockTransQueue($serverUniqueId);
+            $this->unlockTransQueue($serverUniqueId);
             return $res;
         }
 
@@ -828,7 +841,7 @@ class LkkRedisQueueService extends LkkService {
                         $this->redis->hDel($tranTabKey, $itemKey);
                         $this->redis->zRem($tranQueKey, $itemKey);
                         if($oldQueInfo->isSort) {
-                            $score = isset($tranItem['item'][self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$tranItem['item'][self::REDIS_QUEUE_SCORE_FIELD] : time();
+                            $score = isset($tranItem['item'][self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$tranItem['item'][self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
                             $this->redis->zAdd($oldQueInfo->queueKey, $score, $tranItem['item']);
                         }else{
                             $this->redis->rPush($oldQueInfo->queueKey, $tranItem['item']);
@@ -855,7 +868,7 @@ class LkkRedisQueueService extends LkkService {
             $msg = $e->getMessage();
             $this->setError('发生意外,'.$msg);
         }
-        self::unlockTransQueue($serverUniqueId);
+        $this->unlockTransQueue($serverUniqueId);
 
         return (int)$successNum;
     }
