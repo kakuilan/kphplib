@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 use Lkk\LkkHttp;
 use Lkk\Helpers\DirectoryHelper;
 use Lkk\Helpers\EncryptHelper;
+use Lkk\Helpers\ValidateHelper;
 
 class HelperTest extends TestCase {
 
@@ -24,6 +25,16 @@ class HelperTest extends TestCase {
         $this->assertTrue(is_numeric($res));
         $this->assertEquals($len, 11);
     }
+
+
+    public function testNumeric() {
+        $str = '111.0';
+        $res1 = ValidateHelper::isInteger($str);
+        $res2 = ValidateHelper::isFloat($str);
+        $this->assertEquals($res1, false);
+        $this->assertEquals($res2, true);
+    }
+
 
 
 
