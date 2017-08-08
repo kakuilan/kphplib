@@ -701,6 +701,70 @@ class LkkRedisQueueService extends LkkService {
 
 
     /**
+     * 消息批量确认(处理完毕后向队列确认,成功则从中转队列移除;失败则重新加入任务队列;若无确认,消息重新入栈)
+     * @param array $items 消息数组
+     * @param bool $procRes 处理结果:true成功,false失败
+     * @param string $queueName 队列名,为空则取当前队列名
+     * @param int $num 分批数量
+     * @return int
+     */
+    public function confirmMult($items=[], $procRes=true, $queueName='', $num=50) {
+        $res = 0;
+        if(empty($items)) {
+            $this->setError('消息不能为空');
+            return $res;
+        }
+
+        if(empty($queueName)) $queueName = $this->curQueName;
+        $baseInfo = $this->getQueueBaseInfo($queueName);
+        if(empty($baseInfo)) {
+            $this->setError('队列名不存在');
+            return $res;
+        }
+
+        $tranQueKey = self::getTransQueueKey();
+        $tranTabKey = self::getTransTableKey();
+
+        //数组分段
+        $slices = array_chunk($items, $num, true);
+        $sucNum = $faiNum = 0;
+        foreach ($slices as $slice) {
+            //redis事务
+            $this->redis->multi();
+
+            foreach ($slice as $item) {
+                $tranItemData = [
+                    'queueName' => $queueName,
+                    'item' => $item,
+                ];
+                $tranItemKey = md5(serialize($tranItemData));
+
+                $this->redis->zRem($tranQueKey, $tranItemKey);
+                $this->redis->hDel($tranTabKey, $tranItemKey);
+                if(!$procRes) { //重新入栈
+                    if($baseInfo->isSort) {
+                        $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
+                        $res = $this->redis->zAdd($baseInfo->queueKey, $score, $item);
+                    }else{
+                        $res = $this->redis->rPush($baseInfo->queueKey, $item);
+                    }
+                }
+            }
+
+            $cfmRes = $this->redis->exec();
+            $slicNum = count($slice);
+            if(!isset($cfmRes[0]) || empty($cfmRes[0])) {
+                $faiNum += $slicNum;
+            }else{
+                $sucNum += $slicNum;
+            }
+        }
+
+        return $sucNum;
+    }
+
+
+    /**
      * 清空队列(谨慎)
      * @param string $queueName 队列名
      * @return bool
