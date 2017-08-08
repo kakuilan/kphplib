@@ -704,11 +704,11 @@ class LkkRedisQueueService extends LkkService {
      * 消息批量确认(处理完毕后向队列确认,成功则从中转队列移除;失败则重新加入任务队列;若无确认,消息重新入栈)
      * @param array $items 消息数组
      * @param bool $procRes 处理结果:true成功,false失败
-     * @param string $queueName 队列名,为空则取当前队列名
      * @param int $num 分批数量
+     * @param string $queueName 队列名,为空则取当前队列名
      * @return int
      */
-    public function confirmMult($items=[], $procRes=true, $queueName='', $num=50) {
+    public function confirmMult($items=[], $procRes=true, $num=50, $queueName='') {
         $res = 0;
         if(empty($items)) {
             $this->setError('消息不能为空');
