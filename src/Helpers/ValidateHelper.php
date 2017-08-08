@@ -22,7 +22,7 @@ class ValidateHelper {
         if (!is_scalar($val) || is_bool($val)) {
             return false;
         }
-        if (is_float($val + 0) && ($val + 0) > PHP_INT_MAX) {
+        if (is_numeric($val) && is_float($val + 0) && ($val + 0) > PHP_INT_MAX) {
             return false;
         }
         return is_float($val) ? false : preg_match('~^((:?+|-)?[0-9]+)$~', $val);
@@ -38,7 +38,7 @@ class ValidateHelper {
         if (!is_scalar($val)) {
             return false;
         }
-        return is_float($val + 0);
+        return is_numeric($val) && is_float($val + 0);
     }
 
 
