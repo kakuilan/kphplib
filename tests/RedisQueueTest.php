@@ -138,6 +138,56 @@ class RedisQueueTest extends TestCase {
 
 
 
+    public function testConfirmMult() {
+        $maxNum = 10000;
+        $msgArr = [];
+        $faker = \Faker\Factory::create();
+
+        $queueName = 'gps_test';
+        $queue = new AppRedisQueue();
+        $queue->newQueue($queueName);
+
+        $startTime = strtotime('2016-12-01');
+        $endTime = strtotime('2017-12-01');
+        $entitys = ['firstTruck','secondTruck','thirdTruck'];
+        $newNum = $pullNum = $sucNum = $faiNum = $confirmNum = 0;
+        for ($i=0;$i<$maxNum;$i++) {
+            $entity_name = $entitys[array_rand($entitys)];
+            $lat = $faker->randomFloat(9, 10, 60);
+            $lng = $faker->randomFloat(9, 80, 150);
+            $speed = $faker->randomFloat(2, 30, 120);
+            $height = $faker->numberBetween(-50, 1500);
+            $direction = $faker->numberBetween(0, 359);
+            $loc_time = $faker->numberBetween($startTime, $endTime);
+
+            $gpsItem = [
+                'entity_name' => $entity_name,
+                'lat' => $lat,
+                'lng' => $lng,
+                'speed' => $speed,
+                'height' => $height,
+                'direction' => $direction,
+                'loc_time' => $loc_time,
+            ];
+            $res = $queue->push($gpsItem);
+            if($res) $newNum++;
+        }
+
+        //取出
+        while ($item = $queue->pop()) {
+            $pullNum++;
+            $item = (array)$item;
+            array_push($msgArr, $item);
+        }
+
+        //批量确认
+        $confirmNum = $queue->confirmMult($msgArr, true, 50);
+        $this->assertEquals($newNum, $maxNum);
+        $this->assertEquals($pullNum, $maxNum);
+        $this->assertEquals($confirmNum, $maxNum);
+    }
+
+
 
 
 

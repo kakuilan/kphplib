@@ -728,6 +728,7 @@ class LkkRedisQueueService extends LkkService {
         //数组分段
         $slices = array_chunk($items, $num, true);
         $sucNum = $faiNum = 0;
+        $index = $num * 2 - 1;
         foreach ($slices as $slice) {
             //redis事务
             $this->redis->multi();
@@ -753,7 +754,7 @@ class LkkRedisQueueService extends LkkService {
 
             $cfmRes = $this->redis->exec();
             $slicNum = count($slice);
-            if(!isset($cfmRes[0]) || empty($cfmRes[0])) {
+            if(!isset($cfmRes[$index]) || empty($cfmRes[$index])) {
                 $faiNum += $slicNum;
             }else{
                 $sucNum += $slicNum;
