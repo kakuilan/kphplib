@@ -137,7 +137,9 @@ class RedisQueueTest extends TestCase {
     }
 
 
-
+    /**
+     * 测试批量确认
+     */
     public function testConfirmMult() {
         $maxNum = 10000;
         $msgArr = [];
