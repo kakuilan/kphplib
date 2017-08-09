@@ -619,6 +619,7 @@ class LkkRedisQueueService extends LkkService {
         $score = time();
         $tranQueKey = self::getTransQueueKey();
         $tranTabKey = self::getTransTableKey();
+
         $tranItemData = [
             'queueName' => $queueName,
             'item' => $item,
@@ -648,8 +649,88 @@ class LkkRedisQueueService extends LkkService {
 
 
     /**
+     * 获取中转消息的哈希key
+     * @param array $item 原消息
+     * @param string $queueName 原队消息列名
+     * @return string
+     */
+    public function getTranItemKey($item=[], $queueName='') {
+        $res = '';
+        if(empty($item)) return $res;
+
+        if(empty($queueName)) $queueName = $this->curQueName;
+
+        $tranItemData = [
+            'queueName' => $queueName,
+            'item' => $item,
+        ];
+        $res = md5(serialize($tranItemData));
+
+        return $res;
+    }
+
+
+    /**
+     * 获取多个中转消息的哈希key
+     * @param array $items 原消息数组
+     * @param string $queueName 原队消息列名
+     * @return array
+     */
+    public function getMultTranItemKeys($items=[], $queueName='') {
+        $res = [];
+        if(empty($items)) return $res;
+
+        if(empty($queueName)) $queueName = $this->curQueName;
+        foreach ($items as $item) {
+            $tranItemData = [
+                'queueName' => $queueName,
+                'item' => $item,
+            ];
+            $key = md5(serialize($tranItemData));
+            array_push($res, $key);
+        }
+
+        return $res;
+    }
+
+
+
+    /**
+     * 根据消息中转key获取消息
+     * @param string $key
+     * @return bool|string
+     */
+    public function getTranItemByKey($key='') {
+        $res = false;
+        if(empty($key)) return $res;
+
+        $tranTabKey = self::getTransTableKey();
+        $res = $this->redis->hGet($tranTabKey, $key);
+
+        return $res;
+    }
+
+
+    /**
+     * 根据消息中转keys获取多个消息
+     * @param array $keys
+     * @return array
+     */
+    public function getMultTranItemByKeys($keys=[]) {
+        $res = [];
+        if(empty($keys)) return $res;
+
+        $tranTabKey = self::getTransTableKey();
+        $res = $this->redis->hmGet($tranTabKey, $keys);
+
+        return $res;
+    }
+
+
+
+    /**
      * 消息确认(处理完毕后向队列确认,成功则从中转队列移除;失败则重新加入任务队列;若无确认,消息重新入栈)
-     * @param mixed $item 消息
+     * @param mixed $item 消息或该消息的中转key
      * @param bool $procRes 处理结果:true成功,false失败
      * @param string $queueName 队列名,为空则取当前队列名
      * @return bool
@@ -668,13 +749,15 @@ class LkkRedisQueueService extends LkkService {
             return $res;
         }
 
+        if(is_string($item)) {
+            $tranItemKey = $item;
+            if(!$procRes) $item = $this->getTranItemByKey($tranItemKey);
+        }else{
+            $tranItemKey = $this->getTranItemKey($item);
+        }
+
         $tranQueKey = self::getTransQueueKey();
         $tranTabKey = self::getTransTableKey();
-        $tranItemData = [
-            'queueName' => $queueName,
-            'item' => $item,
-        ];
-        $tranItemKey = md5(serialize($tranItemData));
 
         //redis事务
         $this->redis->multi();
@@ -709,7 +792,9 @@ class LkkRedisQueueService extends LkkService {
      * @return int
      */
     public function confirmMult($items=[], $procRes=true, $num=50, $queueName='') {
-        $res = 0;
+        $res = $sucNum = $faiNum = 0;
+        $index = $num * 2 - 1;
+        $isKey = false;
         if(empty($items)) {
             $this->setError('消息不能为空');
             return $res;
@@ -722,27 +807,32 @@ class LkkRedisQueueService extends LkkService {
             return $res;
         }
 
+        if(is_string(current($items))) {
+            $keys = $items;
+            $isKey = true;
+        }else{
+            $keys = $this->getMultTranItemKeys($items);
+        }
+
         $tranQueKey = self::getTransQueueKey();
         $tranTabKey = self::getTransTableKey();
 
         //数组分段
-        $slices = array_chunk($items, $num, true);
-        $sucNum = $faiNum = 0;
-        $index = $num * 2 - 1;
+        $slices = array_chunk($keys, $num, true);
         foreach ($slices as $slice) {
+            if(!$procRes && $isKey) {
+                $sliceItems = $this->getMultTranItemByKeys($slice);
+            }
+
             //redis事务
             $this->redis->multi();
 
-            foreach ($slice as $item) {
-                $tranItemData = [
-                    'queueName' => $queueName,
-                    'item' => $item,
-                ];
-                $tranItemKey = md5(serialize($tranItemData));
-
+            foreach ($slice as $k=>$tranItemKey) {
                 $this->redis->zRem($tranQueKey, $tranItemKey);
                 $this->redis->hDel($tranTabKey, $tranItemKey);
+
                 if(!$procRes) { //重新入栈
+                    $item = $isKey ? $sliceItems[$tranItemKey] : $items[$k];
                     if($baseInfo->isSort) {
                         $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
                         $res = $this->redis->zAdd($baseInfo->queueKey, $score, $item);
@@ -750,6 +840,7 @@ class LkkRedisQueueService extends LkkService {
                         $res = $this->redis->rPush($baseInfo->queueKey, $item);
                     }
                 }
+
             }
 
             $cfmRes = $this->redis->exec();

@@ -176,14 +176,17 @@ class RedisQueueTest extends TestCase {
         }
 
         //取出
+        $keys = [];
         while ($item = $queue->pop()) {
             $pullNum++;
             $item = (array)$item;
+            $key = $queue->getTranItemKey($item);
+            array_push($keys, $key);
             array_push($msgArr, $item);
         }
 
         //批量确认
-        $confirmNum = $queue->confirmMult($msgArr, true, 50);
+        $confirmNum = $queue->confirmMult($keys, true, 50);
         $this->assertEquals($newNum, $maxNum);
         $this->assertEquals($pullNum, $maxNum);
         $this->assertEquals($confirmNum, $maxNum);
