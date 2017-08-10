@@ -217,4 +217,57 @@ class ArrayHelper {
     }
 
 
+    /**
+     * 从数组中搜索对应元素(单个)
+     * @param array $data 要搜索的数组
+     * @param array $condition 条件
+     * @param bool $delSource 取出后,是否删除原数组的元素
+     * @return bool|mixed
+     */
+    public static function arraySearchItem(&$data = [], $condition = [], $delSource=false) {
+        if (empty($data)) return false;
+        $match = count($condition);
+        foreach ($data as $j=>$item) {
+            $check = 0;
+            foreach ($condition as $k => $v) {
+                if (isset($item[$k]) && $item[$k] == $v) $check++;
+            }
+
+            if ($check == $match) {
+                if($delSource) unset($data[$j]);
+                return $item;
+            }
+        }
+
+        return false;
+    }
+
+
+    /**
+     * 从数组中搜索对应元素(多个)
+     * @param array $data 要搜索的数组
+     * @param array $condition 条件
+     * @param bool $delSource 取出后,是否删除原数组的元素
+     * @return array|bool
+     */
+    public static function arraySearchMutilItem(&$data = [], $condition = [], $delSource=false) {
+        if (empty($data)) return false;
+        $res = array();
+        $match = count($condition);
+        foreach ($data as $j=>$item) {
+            $check = 0;
+            foreach ($condition as $k => $v) {
+                if (isset($item[$k]) && $item[$k] == $v) $check++;
+            }
+
+            if ($check == $match) {
+                $res[] = $item;
+                if($delSource) unset($data[$j]);
+            }
+        }
+
+        return $res;
+    }
+
+
 }
