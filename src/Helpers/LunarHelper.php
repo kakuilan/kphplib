@@ -83,8 +83,8 @@ class LunarHelper {
             $res = "鼠";
             break;
             case 0:
-                $res = "牛";
-                break;
+            $res = "牛";
+            break;
             case 11 : case -1:
             $res = "虎";
             break;

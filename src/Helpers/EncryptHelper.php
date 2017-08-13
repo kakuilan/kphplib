@@ -12,6 +12,28 @@ namespace Lkk\Helpers;
 
 class EncryptHelper {
 
+
+    /**
+     * url安全的base64_encode
+     * @param string $data
+     * @return string
+     */
+    public static function base64urlEncode($data='') {
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+    }
+
+
+    /**
+     * url安全的base64_decode
+     * @param string $data
+     * @return string
+     */
+    public static function base64urlDecode($data='') {
+        return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
+    }
+
+
+
     /**
      * UC的加解密函数
      * @param string $string 待操作字符串
