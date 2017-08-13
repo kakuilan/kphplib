@@ -14,6 +14,26 @@ class ArrayHelper {
 
 
     /**
+     * 检查字符串$string是否包含数组$arr的元素之一
+     * @param string $string
+     * @param array $arr
+     * @param bool $returnvalue 返回匹配的字符串还是返回布尔值
+     * @param bool $case 是否检查大小写
+     * @return bool
+     */
+    public static function dstrpos($string, $arr, $returnvalue = false, $case = false) {
+        if(empty($string)) return false;
+        foreach((array)$arr as $v) {
+            if($case ? strpos($string, $v) !== false : stripos($string, $v) !== false) {
+                $return = $returnvalue ? $v : true;
+                return $return;
+            }
+        }
+        return false;
+    }
+
+
+    /**
      * 对多维数组进行排序
      * @param array $multi_array
      * @param string $sort_key 排序键值
