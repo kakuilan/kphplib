@@ -2,13 +2,17 @@
   "name": "kakuilan/kphplib",
   "description": "lkk's php library",
   "keywords": [
-    "php library","redis queue","helper"
+    "php library",
+    "redis queue",
+    "helper"
   ],
+  "homepage": "https://github.com/kakuilan/kphplib",
   "license": "MIT",
   "authors": [
     {
       "name": "kakuilan",
-      "email": "kakuilan@163.com"
+      "email": "kakuilan@163.com",
+      "homepage": "https://github.com/kakuilan"
     }
   ],
   "require": {
