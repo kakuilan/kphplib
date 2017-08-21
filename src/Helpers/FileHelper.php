@@ -539,4 +539,28 @@ class FileHelper {
     }
 
 
+    /**
+     * 获取文件的mime类型
+     * @param string $filePath 文件路径
+     * @param bool   $real 是否获取真实的
+     *
+     * @return mixed|string
+     */
+    public static function getFileMime($filePath='', $real=false) {
+        $res = '';
+        if($real) {
+            $handle = finfo_open(FILEINFO_MIME, '/usr/share/file/magic');
+            $res = finfo_file($handle, $filePath);
+            finfo_close($handle);
+        }else{
+            $allMimes = self::getMimes();
+            $ext = self::getFileExt($filePath);
+            $res = $allMimes[$ext] ?? '';
+        }
+
+        return $res;
+    }
+
+
+
 }
