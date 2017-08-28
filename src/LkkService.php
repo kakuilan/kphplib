@@ -12,7 +12,8 @@ namespace Lkk;
 class LkkService extends LkkObject {
 
     protected $errno, $error;
-    protected static $instance;
+    protected static $instance; //供静态绑定
+    protected static $_instance; //供最终子类绑定
 
 
     /**
@@ -34,7 +35,7 @@ class LkkService extends LkkObject {
 
 
     /**
-     * 实例化并返回
+     * 实例化并返回[静态绑定,可直接调用父类获取]
      * @param array $vars
      * @return mixed
      */
@@ -49,10 +50,27 @@ class LkkService extends LkkObject {
 
 
     /**
+     * 实例化并返回[静态绑定,仅供(当前)子类调用]
+     * @param array $vars
+     *
+     * @return mixed
+     */
+    public static function getInstance(array $vars = []) {
+        if(is_null(static::$_instance) || !is_object(static::$_instance)) {
+            //静态延迟绑定
+            static::$_instance = new static($vars);
+        }
+
+        return static::$_instance;
+    }
+
+
+    /**
      * 销毁实例化对象
      */
     public static function destroy() {
         static::$instance = null;
+        static::$_instance = null;
     }
 
 
