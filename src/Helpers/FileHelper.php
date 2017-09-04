@@ -124,7 +124,7 @@ class FileHelper {
                         $new .= $ts;
                         $iw = true;
                     } elseif($tn == T_WHITESPACE) {
-                        $nt = @$tokens[$i+1];
+                        $nt = $tokens[$i+1];
                         if(!$iw && (!is_string($nt) || $nt == '$') && !in_array($nt[0], $IW)) {
                             $new .= " ";
                         }
@@ -180,10 +180,10 @@ class FileHelper {
         $result = false;
         $dir = dirname($file);
         if (mkdir($dir, 0766, true)) {
-            if ($fp = @fopen($file, $append ? 'ab' : 'wb')) {
-                $result = @fwrite($fp, $data);
-                @fclose($fp);
-                @chmod($file, $mode);
+            if ($fp = fopen($file, $append ? 'ab' : 'wb')) {
+                $result = fwrite($fp, $data);
+                fclose($fp);
+                chmod($file, $mode);
             }
         }
 
