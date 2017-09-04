@@ -35,28 +35,27 @@ class LkkService extends LkkObject {
 
 
     /**
-     * 实例化并返回[静态绑定,可直接调用父类获取]
+     * 实例化并返回[父类]
      * @param array $vars
      * @return mixed
      */
     public static function instance(array $vars = []) {
-        if(is_null(self::$instance) || !is_object(self::$instance)) {
-            //静态延迟绑定
-            static::$instance = new static($vars);
+        if(is_null(self::$instance) || !is_object(self::$instance) || !(self::$instance instanceof self)) {
+            self::$instance = new self($vars);
         }
 
-        return static::$instance;
+        return self::$instance;
     }
 
 
     /**
-     * 实例化并返回[静态绑定,仅供(当前)子类调用]
+     * 实例化并返回[静态绑定,供(当前)子类调用]
      * @param array $vars
      *
      * @return mixed
      */
     public static function getInstance(array $vars = []) {
-        if(is_null(static::$_instance) || !is_object(static::$_instance)) {
+        if(is_null(static::$_instance) || !is_object(static::$_instance) || !(static::$_instance instanceof static)) {
             //静态延迟绑定
             static::$_instance = new static($vars);
         }
@@ -69,7 +68,7 @@ class LkkService extends LkkObject {
      * 销毁实例化对象
      */
     public static function destroy() {
-        static::$instance = null;
+        self::$instance = null;
         static::$_instance = null;
     }
 

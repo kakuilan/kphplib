@@ -14,6 +14,7 @@ use PHPUnit\Framework\TestCase;
 use Lkk\LkkService;
 use Lkk\LkkMacAddress;
 
+
 class ServiceTest extends TestCase {
 
 
@@ -39,6 +40,23 @@ class ServiceTest extends TestCase {
         $mac = LkkMacAddress::getMacAddress();
         $len = strlen($mac);
         $this->assertEquals($len, 17);
+    }
+
+
+    /**
+     * 测试服务实例
+     */
+    public function testServiceInstance() {
+        $ins1 = AppRedisQueue::instance();
+        $cls1 = get_class($ins1);
+        $ins2 = AppRedisQueue::getInstance();
+        $cls2 = get_class($ins2);
+
+        $chk1 = $ins1 instanceof LkkService;
+        $chk2 = $ins2 instanceof AppRedisQueue;
+
+        $this->assertTrue($chk1);
+        $this->assertTrue($chk2);
     }
 
 
