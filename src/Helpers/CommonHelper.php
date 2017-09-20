@@ -32,7 +32,7 @@ class CommonHelper {
      */
     public static function isReallyWritable($file='') {
         // If we're on a Unix server with safe_mode off we call is_writable
-        if (DIRECTORY_SEPARATOR == '/' and @ini_get('safe_mode') == false){
+        if (DIRECTORY_SEPARATOR == '/' and ini_get('safe_mode') == false){
             return is_writable($file);
         }
 
@@ -41,17 +41,17 @@ class CommonHelper {
         if (is_dir($file)){
             $file = rtrim($file, '/') . '/_isReallyWritable_' . md5(mt_rand(1,10000));
 
-            if (! @file_put_contents($file, 'php isReallyWritable() test file')){
+            if (! file_put_contents($file, 'php isReallyWritable() test file')){
                 return false;
             }else{
-                @unlink($file);
+                unlink($file);
             }
 
             return true;
-        }elseif ( ($fp = @fopen($file, 'w+')) === false) {
+        }elseif ( ($fp = fopen($file, 'w+')) === false) {
             return false;
         }
-        @fclose($fp);
+        fclose($fp);
 
         return true;
     }
