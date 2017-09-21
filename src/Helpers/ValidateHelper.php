@@ -218,6 +218,21 @@ class ValidateHelper {
 
 
     /**
+     * 是否英文字符串
+     * @param $string
+     * @return bool
+     */
+    public static function isEnglish($string) {
+        if (preg_match("/^[a-z]+/i", $string)) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+
+    /**
      * 检查字符串是否日期格式(且转换为时间戳)
      * @param $string
      * @return int
