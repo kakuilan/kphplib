@@ -376,8 +376,9 @@ class StringHelper {
         $string = strip_tags($string);
 
         //移除html,js,css标签
-        $search = array ("'<script[^>]*?>.*?</script>'si", // 去掉 javascript
-            "'<style[^>]*?>.*?</style>'si", // 去掉 css
+        $search = array (
+            "'<script[^>]*?>.*?<\/script>'si", // 去掉 javascript
+            "'<style[^>]*?>.*?<\/style>'si", // 去掉 css
             "'<[/!]*?[^<>]*?>'si", // 去掉 HTML 标记
             "'<!--[/!]*?[^<>]*?>'si", // 去掉 注释标记
             "'([rn])[s]+'", // 去掉空白字符
@@ -391,7 +392,8 @@ class StringHelper {
             "'&(pound|#163);'i",
             "'&(copy|#169);'i",
             "'&#(d+);'e"); // 作为PHP代码运行
-        $replace = array ("",
+        $replace = array (
+            "",
             "",
             "",
             "",

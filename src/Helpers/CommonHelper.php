@@ -11,6 +11,7 @@
 namespace Lkk\Helpers;
 
 use Lkk\Helpers\ArrayHelper;
+use Lkk\Helpers\StringHelper;
 
 class CommonHelper {
 
@@ -435,6 +436,74 @@ class CommonHelper {
         return $uri;
     }
 
+
+
+    /**
+     * HTML标签 转换为 HTML实体
+     * @param string $content 内容
+     * @param bool $nl2br 是否换行
+     * @return mixed|string
+     */
+    public static function htmltagConvert($content, $nl2br = true) {
+        $content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
+        if ($nl2br) {
+            $content = nl2br($content);
+        }
+        $content = str_replace(' ', '&nbsp;', $content);
+        $content = str_replace("\t", '&nbsp;&nbsp;&nbsp;&nbsp;', $content);
+        return $content;
+    }
+
+
+
+    /**
+     * 替换SQL/php执行关键词为全角
+     * @param string $str
+     * @return mixed|string
+     */
+    public static function replaceSQLEval($str='') {
+        $sql = ['add ', 'and ', 'count ', 'order ', 'table ', 'create ', 'delete ', 'drop ', 'from ', 'grant ', 'insert ', 'select ', 'truncate ', 'update ', 'use ', 'union ', 'where ', 'alert ', 'execute ', 'master ', 'declare ', 'show ', 'outfile ', 'group_concat', 'column_name', 'information_schema.columns', 'table_schema'];
+
+        $eval = ['eval', 'exec', 'passthru', 'proc_open', 'shell_exec', 'system', '$$', 'include', 'require', 'assert'];
+
+        $arr = array_merge($sql, $eval);
+        foreach ($arr as $v) {
+            if(stripos($str, $v) !==false) {
+                $v = trim($v);
+                $str = str_ireplace($v, StringHelper::SBCxDBC($v,0), $str);
+            }
+        }
+
+        return $str;
+    }
+
+
+
+    /**
+     * 字符串安全过滤函数
+     * @param $string
+     * @return string
+     */
+    public static function filterString($string) {
+        $string = str_replace('%20','',$string);
+        $string = str_replace('%27','',$string);
+        $string = str_replace('%2527','',$string);
+        $string = str_replace('<','&lt;',$string);
+        $string = str_replace('>','&gt;',$string);
+        $string = str_replace('(','&#40;',$string);
+        $string = str_replace(')','&#41;',$string);
+        $string = str_replace('{','&#123;',$string);
+        $string = str_replace('}','&#125;',$string);
+        $string = str_replace('"','&quot;',$string);
+        $string = str_replace("'",'&#39;',$string);
+        $string = str_replace('\\','&#92;',$string);
+        $string = str_replace('$','&#36;',$string);
+
+        $string = preg_replace('/[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]/','',$string); //去掉控制字符
+        $string = str_replace(array("\0","%00","\r","\t"),'',$string);//\0表示ASCII 0x00的字符，通常作为字符串结束标志；这三个都是可能有害字符
+
+        return $string;
+    }
 
 
 
