@@ -389,7 +389,8 @@ class CommonHelper {
     public static function getDomain($url='', $firstLevel=false){
         if(empty($url)) $url = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
 
-        $parse = parse_url($url);
+        if(!stripos($url, '://')) $url = 'http://' .$url;
+        $parse = parse_url(strtolower($url));
         $domain = null;
         if(isset($parse['host'])) $domain = $parse['host'];
 
