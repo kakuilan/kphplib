@@ -16,9 +16,9 @@
     }
   ],
   "require": {
-    "php": ">=7.0.0",
-    "phpunit/phpunit": "^6.1",
-    "fzaninotto/faker": "^1.6.0"
+    "php": "^7.0",
+    "phpunit/phpunit": "^6.4",
+    "fzaninotto/faker": "^1.7.0"
   },
   "require-dev": {
   },
