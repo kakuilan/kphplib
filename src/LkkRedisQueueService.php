@@ -57,6 +57,7 @@ class LkkRedisQueueService extends LkkService {
             'host' => '127.0.0.1',
             'port' => 6379,
             'password' => null,
+            'select' => null, //哪个库
         ];
         $key = md5(json_encode($conf));
 
@@ -67,8 +68,9 @@ class LkkRedisQueueService extends LkkService {
                 $redis->auth($conf['password']);
             }
 
+            $selectDb = (isset($conf['select']) && is_int($conf['select'])) ? $conf['select'] : self::REDIS_QUEUE_DATABASE;
             $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
-            $redis->select(self::REDIS_QUEUE_DATABASE);
+            $redis->select($selectDb);
 
             $redisArr[$key] = $redis;
         }
