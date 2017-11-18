@@ -43,6 +43,26 @@ class ValidateHelper {
 
 
     /**
+     * 是否奇数
+     * @param $num
+     * @return int
+     */
+    public static function isOdd($num) {
+        return (is_numeric($num) & ($num&1) );
+    }
+
+
+    /**
+     * 是否偶数
+     * @param $num
+     * @return int
+     */
+    public static function isEven($num) {
+        return (is_numeric($num) & (!($num&1)) );
+    }
+
+
+    /**
      * 是否JSON格式
      * @param string $str
      *
