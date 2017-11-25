@@ -9,6 +9,8 @@
 
 namespace Lkk;
 
+use Lkk\Helpers\CommonHelper;
+
 class LkkHttp {
 
     public		$param		= [];	    //构造函数参数
@@ -232,7 +234,7 @@ class LkkHttp {
     private function _checkReceiveHeader($header){
         if(strstr($header,' 301 ') || strstr($header,' 302 ')){//重定向处理
             preg_match("/Location:(.*?)$/im", $header, $match);
-            $url = (empty($match)) ? '' : trim($match[1]);
+            $url = (empty($match)) ? '' : $this->getCompleteUrl($match[1]);
             preg_match("/Set-Cookie:(.*?)$/im",$header,$match);
             $cookie	= (empty($match)) ? '' : $match[1];
             if($this->redirect <3){
@@ -245,6 +247,28 @@ class LkkHttp {
         }else{
             return 200;
         }
+    }
+
+
+    /**
+     * 获取完整URL(防止有些相对路径)
+     * @param $url
+     * @return string
+     */
+    private function getCompleteUrl($url) {
+        $url = trim($url);
+        if(stripos($url, 'http')===false) {
+            $baseInfo = parse_url($this->url);
+            $domain = CommonHelper::getDomain($this->url);
+
+            if(stripos($url, '//')===0) {
+                $url = $baseInfo['scheme'] . ':' . rtrim($url, '/');
+            }else{
+                $url = $baseInfo['scheme'] . '://' .$domain . '/' . ltrim($url, '/');
+            }
+        }
+
+        return $url;
     }
 
 
