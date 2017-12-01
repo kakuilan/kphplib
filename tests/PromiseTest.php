@@ -12,37 +12,51 @@ namespace Lkk\Tests;
 use PHPUnit\Framework\TestCase;
 
 use Lkk\Concurrent\Promise;
-
+use Lkk\Helpers\CommonHelper;
 
 class PromiseTest extends TestCase {
 
     private static function randFilea() {
-        $now = time();
-        $file = __DIR__ ."/log_{$now}_a";
-        touch($file);
-        yield;
+        $total = 10;
+        for($i=1;$i<=$total;$i++) {
+            $now = CommonHelper::getMillisecond();
+            echo "This is task a iteration $i.\n";
+            $file = __DIR__ ."/log_{$now}_a_{$i}";
+            touch($file);
+            yield;
+        }
     }
 
     private static function randFileb() {
-        $now = time();
-        $file = __DIR__ ."/log_{$now}_b";
-        touch($file);
-        yield;
+        $total = 10;
+        for($i=1;$i<=$total;$i++) {
+            $now = CommonHelper::getMillisecond();
+            echo "This is task b iteration $i.\n";
+            $file = __DIR__ ."/log_{$now}_b_{$i}";
+            touch($file);
+            yield;
+        }
     }
 
     private static function randFilec() {
-        $now = time();
-        $file = __DIR__ ."/log_{$now}_c";
-        touch($file);
-        yield;
+        $total = 10;
+        for($i=1;$i<=$total;$i++) {
+            $now = CommonHelper::getMillisecond();
+            echo "This is task c iteration $i.\n";
+            $file = __DIR__ ."/log_{$now}_c_{$i}";
+            touch($file);
+            yield;
+        }
     }
 
+    
     public function testPromise() {
         Promise::co(function() {
             yield self::randFilea();
             yield self::randFileb();
             yield self::randFilec();
         });
+
     }
 
 
