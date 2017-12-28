@@ -15,6 +15,7 @@ use Lkk\Helpers\DirectoryHelper;
 use Lkk\Helpers\EncryptHelper;
 use Lkk\Helpers\ValidateHelper;
 use Lkk\Helpers\ArrayHelper;
+use Lkk\Helpers\CommonHelper;
 
 class HelperTest extends TestCase {
 
@@ -24,11 +25,11 @@ class HelperTest extends TestCase {
      */
     public function testMurmurhash() {
         $num = mt_rand(0, 9999);
-        $res = EncryptHelper::murmurhash3_int($num);
+        $res = EncryptHelper::murmurhash3_int($num, 0, true);
         $len = strlen($res);
 
         $this->assertTrue(is_numeric($res));
-        $this->assertEquals($len, 11);
+        $this->assertLessThanOrEqual(11, $len);
     }
 
 
@@ -84,6 +85,21 @@ class HelperTest extends TestCase {
         $this->assertEquals($len, $maxNum);
     }
 
+
+    /**
+     * 测试ipv4转为long型
+     */
+    public function testIp2Long() {
+        //$ip = '192.168.101.100';
+        $faker = \Faker\Factory::create();
+        $ip = $faker->ipv4;
+
+        $long1 = ip2long($ip);
+        $long2 = CommonHelper::ip2UnsignedInt($ip);
+        $ip2 = long2ip($long2);
+
+        $this->assertEquals($ip, $ip2);
+    }
 
 
 

@@ -507,5 +507,24 @@ class CommonHelper {
     }
 
 
+    /**
+     * IP地址转成无符号整型类型(PHP内置函数ip2long会返回负值)
+     * @param string $ip
+     * @return int
+     */
+    public static function ip2UnsignedInt($ip='') {
+        if(empty($ip)) return 0;
+
+        $long = ip2long($ip);
+        if($long==false) {
+            $long = 0;
+        }elseif ($long< 0) {
+            $long = sprintf('%u', $long);
+        }
+
+        return $long;
+    }
+
+
 
 }
