@@ -139,10 +139,12 @@ class CommonHelper {
     /**
      * 获取浏览器信息
      * @param bool $returnAll 是否返回所有信息:否-只返回浏览器名称;是-返回相关数组
+     * @param array $server server信息
      * @return array|string
      */
-    public static function getBrowser($returnAll=false){
-        $u_agent = $_SERVER['HTTP_USER_AGENT'];
+    public static function getBrowser($returnAll=false, $server=null){
+        if(empty($server)) $server = $_SERVER;
+        $u_agent = $server['HTTP_USER_AGENT'];
         $bname = 'Unknown';
         $platform = 'Unknown';
         $version= "";
@@ -241,10 +243,12 @@ class CommonHelper {
 
     /**
      * 获取客户端操作系统
+     * @param array $server server信息
      * @return string
      */
-    public static function getClientOS() {
-        $u_agent = $_SERVER['HTTP_USER_AGENT'];
+    public static function getClientOS($server=null) {
+        if(empty($server)) $server = $_SERVER;
+        $u_agent = $server['HTTP_USER_AGENT'];
         $OS = 'Unknown';
         if (preg_match('/win/i',$u_agent)) {
             $OS = 'Windows';
@@ -269,19 +273,22 @@ class CommonHelper {
 
     /**
      * 是否移动请求
+     * @param array $server server信息
      * @return bool|int
      */
-    public static function isMobileRequest() {
+    public static function isMobileRequest($server=null) {
+        if(empty($server)) $server = $_SERVER;
+
         // 如果有HTTP_X_WAP_PROFILE则一定是移动设备
-        if (isset($_SERVER['HTTP_X_WAP_PROFILE'])) {
+        if (isset($server['HTTP_X_WAP_PROFILE'])) {
             return true;
         }
         // 如果via信息含有wap则一定是移动设备,部分服务商会屏蔽该信息
-        elseif (isset($_SERVER['HTTP_VIA']) && stristr($_SERVER['HTTP_VIA'],"wap")) {
+        elseif (isset($server['HTTP_VIA']) && stristr($server['HTTP_VIA'],"wap")) {
             return true;
         }
         // 检查浏览器是否接受 WML
-        elseif(strpos(strtoupper($_SERVER['HTTP_ACCEPT']),"VND.WAP.WML") > 0){
+        elseif(strpos(strtoupper($server['HTTP_ACCEPT']),"VND.WAP.WML") > 0){
             return true;
         }
 
@@ -293,7 +300,7 @@ class CommonHelper {
 
         static $other_list = array('htc','ipod','palm','openwave','nexus one','Cellphone','Xphone','kindle','mmp','pocket','ppc','sqh','spv','treo','vodafone');
 
-        $useragent = strtolower($_SERVER['HTTP_USER_AGENT']);
+        $useragent = strtolower($server['HTTP_USER_AGENT']);
 
         if(ArrayHelper::dstrpos($useragent, $pad_list)) {
             return false;
@@ -318,22 +325,24 @@ class CommonHelper {
 
     /**
      * 获取客户端IP
+     * @param array $server server信息
      * @return string
      */
-    public static function getClientIp() {
-        if (isset($_SERVER)){
+    public static function getClientIp($server=null) {
+        if(empty($server)) $server = $_SERVER;
+        if (!empty($server)){
             //获取代理ip
-            if (isset($_SERVER["HTTP_X_FORWARDED_FOR"]) && preg_match_all('#(\d+\.){3}\d+#', $_SERVER['HTTP_X_FORWARDED_FOR'], $matches)){
+            if (isset($server["HTTP_X_FORWARDED_FOR"]) && preg_match_all('#(\d+\.){3}\d+#', $server['HTTP_X_FORWARDED_FOR'], $matches)){
                 foreach ($matches[0] AS $xip) {
                     if (!preg_match('#^(10|172\.16|192\.168)\.#', $xip)) {
                         $ip = $xip;
                         break;
                     }
                 }
-            } else if (isset($_SERVER["HTTP_CLIENT_IP"])) {
-                $ip = $_SERVER["HTTP_CLIENT_IP"];
+            } else if (isset($server["HTTP_CLIENT_IP"])) {
+                $ip = $server["HTTP_CLIENT_IP"];
             } else {
-                $ip = $_SERVER["REMOTE_ADDR"];
+                $ip = $server["REMOTE_ADDR"];
             }
         } else {
             if (getenv("HTTP_X_FORWARDED_FOR")){
@@ -354,17 +363,16 @@ class CommonHelper {
 
     /**
      * 获取服务器IP
+     * @param array $server server信息
      * @return string
      */
-    public static function getServerIP(){
-        /*static $serverIp = NULL;
-        if($serverIp !== NULL) return $serverIp;*/
-
-        if(isset($_SERVER)){
-            if(isset($_SERVER['SERVER_ADDR'])){
-                $serverIp = $_SERVER['SERVER_ADDR'];
+    public static function getServerIP($server=null){
+        if(empty($server)) $server = $_SERVER;
+        if(!empty($server)){
+            if(isset($server['SERVER_ADDR'])){
+                $serverIp = $server['SERVER_ADDR'];
             }else{
-                $serverIp = $_SERVER['LOCAL_ADDR'];
+                $serverIp = $server['LOCAL_ADDR'];
             }
         }elseif($serverIp = getenv('SERVER_ADDR')){
 
@@ -384,10 +392,12 @@ class CommonHelper {
      * 获取域名
      * @param string $url
      * @param bool $firstLevel 是否获取一级域名,如:abc.test.com取test.com
+     * @param array $server server信息
      * @return null|string
      */
-    public static function getDomain($url='', $firstLevel=false){
-        if(empty($url)) $url = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+    public static function getDomain($url='', $firstLevel=false, $server=null){
+        if(empty($server)) $server = $_SERVER;
+        if(empty($url)) $url = isset($server['HTTP_HOST']) ? $server['HTTP_HOST'] : '';
 
         if(!stripos($url, '://')) $url = 'http://' .$url;
         $parse = parse_url(strtolower($url));
@@ -408,32 +418,36 @@ class CommonHelper {
 
     /**
      * 获取当前页面完整URL地址
+     * @param array $server server信息
      * @return string
      */
-    public static function getUrl() {
-        $sys_protocal = isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443' ? 'https://' : 'http://';
-        $php_self = $_SERVER['PHP_SELF'] ? $_SERVER['PHP_SELF'] : $_SERVER['SCRIPT_NAME'];
-        $path_info = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
-        $relate_url = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] :
-            $php_self.(isset($_SERVER['QUERY_STRING']) ? '?'.$_SERVER['QUERY_STRING'] : $path_info);
-        return $sys_protocal.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '').$relate_url;
+    public static function getUrl($server=null) {
+        if(empty($server)) $server = $_SERVER;
+        $sys_protocal = isset($server['SERVER_PORT']) && $server['SERVER_PORT'] == '443' ? 'https://' : 'http://';
+        $php_self = $server['PHP_SELF'] ? $server['PHP_SELF'] : $server['SCRIPT_NAME'];
+        $path_info = isset($server['PATH_INFO']) ? $server['PATH_INFO'] : '';
+        $relate_url = isset($server['REQUEST_URI']) ? $server['REQUEST_URI'] :
+            $php_self.(isset($server['QUERY_STRING']) ? '?'.$server['QUERY_STRING'] : $path_info);
+        return $sys_protocal.(isset($server['HTTP_HOST']) ? $server['HTTP_HOST'] : '').$relate_url;
     }
 
 
     /**
      * 获取URI
+     * @param array $server server信息
      * @return string
      */
-    public static function getUri() {
-        if (isset($_SERVER['REQUEST_URI'])) {
-            $uri = $_SERVER['REQUEST_URI'];
+    public static function getUri($server=null) {
+        if(empty($server)) $server = $_SERVER;
+        if (isset($server['REQUEST_URI'])) {
+            $uri = $server['REQUEST_URI'];
             return $uri;
         }
-        if (isset($_SERVER['argv'])) {
-            $uri = $_SERVER['PHP_SELF'] . "?" . $_SERVER['argv'][0];
+        if (isset($server['argv'])) {
+            $uri = $server['PHP_SELF'] . "?" . $server['argv'][0];
             return $uri;
         }
-        $uri = $_SERVER['PHP_SELF'] . "?" . $_SERVER['QUERY_STRING'];
+        $uri = $server['PHP_SELF'] . "?" . $server['QUERY_STRING'];
         return $uri;
     }
 
