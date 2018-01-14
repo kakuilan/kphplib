@@ -13,7 +13,7 @@ class LkkRedisQueueService extends LkkService {
 
     const REDIS_QUEUE_DATABASE      = 9; //使用哪个库
     const REDIS_QUEUE_TYPE_ISSORT   = 'issort'; //类型:有序队列(有序集合)
-    const REDIS_QUEUE_TYPE_NOSORT   = 'nosort'; //类型:无序队列(列表)
+    const REDIS_QUEUE_TYPE_NOSORT   = 'nosort'; //类型:无序队列(列表),先进先出
     const REDIS_QUEUE_SCORE_FIELD   = 'queue_score'; //有序列表的分数字段名
     const REDIS_QUEUE_ALLKEY        = 'all_key_table';
     const REDIS_QUEUE_TRANS_QUEU    = 'transfer_que'; //中转队列key
@@ -63,7 +63,7 @@ class LkkRedisQueueService extends LkkService {
 
         if(is_null($redisArr) || !isset($redisArr[$key])) {
             $redis = new \Redis();
-            $redis->connect($conf['host'], $conf['port'], self::$timeout);
+            $redis->pconnect($conf['host'], $conf['port'], self::$timeout);
             if(isset($conf['password']) && !empty($conf['password'])) {
                 $redis->auth($conf['password']);
             }
