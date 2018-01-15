@@ -224,12 +224,26 @@ class ValidateHelper {
 
 
     /**
-     * 是否中文字符串
+     * 是否全是中文字符串
      * @param $string
      * @return bool
      */
     public static function isChinese($string) {
         if (preg_match("/^[\\x{4e00}-\\x{9fa5}]+$/u", $string)) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /**
+     * 是否含有中文字符
+     * @param $string
+     * @return bool
+     */
+    public static function hasChinese($string) {
+        if (preg_match("/([\x81-\xfe][\x40-\xfe])/", $string, $match)) {
             return true;
         }
 
