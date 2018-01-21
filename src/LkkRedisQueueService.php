@@ -63,7 +63,7 @@ class LkkRedisQueueService extends LkkService {
 
         if(is_null($redisArr) || !isset($redisArr[$key])) {
             $redis = new \Redis();
-            $redis->pconnect($conf['host'], $conf['port'], self::$timeout);
+            $redis->connect($conf['host'], $conf['port'], self::$timeout);
             if(isset($conf['password']) && !empty($conf['password'])) {
                 $redis->auth($conf['password']);
             }
