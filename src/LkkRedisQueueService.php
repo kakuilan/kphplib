@@ -47,6 +47,15 @@ class LkkRedisQueueService extends LkkService {
 
 
     /**
+     * 析构函数
+     */
+    public function __destruct() {
+        parent::__destruct();
+        $this->redis->close();
+    }
+
+
+    /**
      * 获取redis客户端连接对象
      * @param array $conf redis配置
      * @return \Redis
