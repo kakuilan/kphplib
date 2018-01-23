@@ -52,7 +52,7 @@ class LkkRedisQueueService extends LkkService {
      */
     public function __destruct() {
         parent::__destruct();
-        $this->redis->close();
+        //$this->redis->close();
     }
 
 
