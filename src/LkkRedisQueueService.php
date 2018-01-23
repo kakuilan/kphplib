@@ -26,6 +26,7 @@ class LkkRedisQueueService extends LkkService {
     public $redisConf; //redis配置
     private static $timeout = 2.5;
     private static $prefix = 'que_';
+    private static $persistent_id = 'redis_queue_conn';
     private static $allQuekeys = []; //当前类用过的所有队列key
     private $curQueName = ''; //当前队列key
 
@@ -56,6 +57,24 @@ class LkkRedisQueueService extends LkkService {
 
 
     /**
+     * 重置redis长连接ID
+     * @param string $id
+     */
+    public static function resetPersistentId($id='') {
+        if(!empty($id)) self::$persistent_id = $id;
+    }
+
+
+    /**
+     * 获取redis长连接ID
+     * @return string
+     */
+    public static function getPersistentId() {
+        return self::$persistent_id;
+    }
+
+
+    /**
      * 获取redis客户端连接对象
      * @param array $conf redis配置
      * @return \Redis
@@ -72,7 +91,8 @@ class LkkRedisQueueService extends LkkService {
 
         if(is_null($redisArr) || !isset($redisArr[$key])) {
             $redis = new \Redis();
-            $redis->connect($conf['host'], $conf['port'], self::$timeout);
+            $persistentId = self::getPersistentId();
+            $redis->pconnect($conf['host'], $conf['port'], self::$timeout, $persistentId);
             if(isset($conf['password']) && !empty($conf['password'])) {
                 $redis->auth($conf['password']);
             }
