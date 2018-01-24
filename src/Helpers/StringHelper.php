@@ -367,52 +367,6 @@ class StringHelper {
     }
 
 
-    /**
-     * 获取纯文本
-     * @param string $string
-     * @return mixed|string
-     */
-    public static function getText($string='') {
-        $string = strip_tags($string);
-
-        //移除html,js,css标签
-        $search = array (
-            "'<script[^>]*?>.*?<\/script>'si", // 去掉 javascript
-            "'<style[^>]*?>.*?<\/style>'si", // 去掉 css
-            "'<[/!]*?[^<>]*?>'si", // 去掉 HTML 标记
-            "'<!--[/!]*?[^<>]*?>'si", // 去掉 注释标记
-            "'([rn])[s]+'", // 去掉空白字符
-            "'&(quot|#34);'i", // 替换 HTML 实体
-            "'&(amp|#38);'i",
-            "'&(lt|#60);'i",
-            "'&(gt|#62);'i",
-            "'&(nbsp|#160);'i",
-            "'&(iexcl|#161);'i",
-            "'&(cent|#162);'i",
-            "'&(pound|#163);'i",
-            "'&(copy|#169);'i",
-            "'&#(d+);'e"); // 作为PHP代码运行
-        $replace = array (
-            "",
-            "",
-            "",
-            "",
-            "\1",
-            "\"",
-            "&",
-            "<",
-            ">",
-            " ",
-            chr(161),
-            chr(162),
-            chr(163),
-            chr(169),
-            "chr(\1)");
-        $string = @preg_replace($search, $replace, $string);
-
-        return $string;
-    }
-
 
     /**
      * br标签转换为nl
@@ -438,14 +392,64 @@ class StringHelper {
 
 
     /**
-     * 移除HTML标签
+     * 获取纯文本(不保留行内空格)
+     * @param string $string
+     * @return mixed|string
+     */
+    public static function getText($string='') {
+        $string = strip_tags($string);
+
+        //移除html,js,css标签
+        $search = array (
+            "'<script[^>]*?>.*?<\/script>'si", // 去掉 javascript
+            "'<style[^>]*?>.*?<\/style>'si", // 去掉 css
+            "'<[/!]*?[^<>]*?>'si", // 去掉 HTML 标记
+            "'<!--[/!]*?[^<>]*?>'si", // 去掉 注释标记
+            "'([rn])[s]+'", // 去掉空白字符
+            "'&(quot|#34);'i", // 替换 HTML 实体
+            "'&(amp|#38);'i",
+            "'&(lt|#60);'i",
+            "'&(gt|#62);'i",
+            "'&(nbsp|#160);'i",
+            "'&(iexcl|#161);'i",
+            "'&(cent|#162);'i",
+            "'&(pound|#163);'i",
+            "'&(copy|#169);'i",
+            "'&#(d+);'"); // 作为PHP代码运行
+
+        $replace = array (
+            "",
+            "",
+            "",
+            "",
+            "\1",
+            "\"",
+            "&",
+            "<",
+            ">",
+            " ",
+            chr(161),
+            chr(162),
+            chr(163),
+            chr(169),
+            "chr(\1)");
+
+        $string = preg_replace($search, $replace, $string);
+        $string = self::removeSpace($string);
+
+        return trim($string);
+    }
+
+
+    /**
+     * 移除HTML标签(保留行内空格)
      * @param string $str
      * @return mixed|string
      */
     public static function removeHtml($str=''){
         $str=preg_replace( "@<(.*?)>@is", "", $str); //过滤标签
         $str=preg_replace("/<\s*img\s+[^>]*?src\s*=\s*(\'|\")(.*?)\\1[^>]*?\/?\s*>/i", "", $str); //过滤img标签
-        $str=preg_replace("@<style(.*?)</style>@is", "", $str); //过滤css
+        $str=preg_replace("@<style(.*?)<\/style>@is", "", $str); //过滤css
         $str=preg_replace("/\s+/", " ", $str); //过滤多余回车
         $str=preg_replace("/<[ ]+/si","<",$str); //过滤<__("<"号后面带空格)
         $str=preg_replace("/<\!--.*?-->/si","",$str); //注释
@@ -476,7 +480,7 @@ class StringHelper {
         $str=preg_replace("/on([a-z]+)\s*=/si","On\\1=",$str); //过滤script标签
         $str=preg_replace("/&#/si","&＃",$str); //过滤script标签
 
-        return $str;
+        return trim($str);
     }
 
 
