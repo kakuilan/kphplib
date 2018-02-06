@@ -139,12 +139,11 @@ class CommonHelper {
     /**
      * 获取浏览器信息
      * @param bool $returnAll 是否返回所有信息:否-只返回浏览器名称;是-返回相关数组
-     * @param array $server server信息
+     * @param string $u_agent 客户端信息
      * @return array|string
      */
-    public static function getBrowser($returnAll=false, $server=null){
-        if(empty($server)) $server = $_SERVER;
-        $u_agent = $server['HTTP_USER_AGENT'];
+    public static function getBrowser($returnAll=false, $u_agent=null){
+        if(empty($u_agent)) $u_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
         $bname = 'Unknown';
         $platform = 'Unknown';
         $version= "";
@@ -243,12 +242,11 @@ class CommonHelper {
 
     /**
      * 获取客户端操作系统
-     * @param array $server server信息
+     * @param string $u_agent 客户端信息
      * @return string
      */
-    public static function getClientOS($server=null) {
-        if(empty($server)) $server = $_SERVER;
-        $u_agent = $server['HTTP_USER_AGENT'];
+    public static function getClientOS($u_agent=null) {
+        if(empty($u_agent)) $u_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
         $OS = 'Unknown';
         if (preg_match('/win/i',$u_agent)) {
             $OS = 'Windows';
