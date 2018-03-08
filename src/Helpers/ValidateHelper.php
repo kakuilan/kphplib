@@ -257,13 +257,26 @@ class ValidateHelper {
      * @return bool
      */
     public static function isEnglish($string) {
-        if (preg_match("/^[a-z]+/i", $string)) {
+        if (preg_match("/^[a-z]+$/i", $string)) {
             return true;
         }
 
         return false;
     }
 
+
+    /**
+     * 是否包含英文字符
+     * @param $string
+     * @return bool
+     */
+    public static function hasEnglish($string) {
+        if (preg_match("/[a-z]+/i", $string)) {
+            return true;
+        }
+
+        return false;
+    }
 
 
     /**
@@ -300,37 +313,41 @@ class ValidateHelper {
 
     /**
      * 是否iPhone
+     * @param string $agent 客户端头信息
      * @return bool
      */
-    public static function isiPhone() {
-        return stripos($_SERVER['HTTP_USER_AGENT'], 'iPhone') !== false;
+    public static function isiPhone($agent='') {
+        return stripos($agent, 'iPhone') !== false;
     }
 
 
     /**
      * 是否iPad
+     * @param string $agent 客户端头信息
      * @return bool
      */
-    public static function isiPad() {
-        return stripos($_SERVER['HTTP_USER_AGENT'], 'iPad') !== false;
+    public static function isiPad($agent='') {
+        return stripos($agent, 'iPad') !== false;
     }
 
 
     /**
      * 是否iOS设备
+     * @param string $agent 客户端头信息
      * @return bool
      */
-    public static function isiOS() {
-        return self::isiPhone() || self::isiPad();
+    public static function isiOS($agent='') {
+        return self::isiPhone($agent) || self::isiPad($agent);
     }
 
 
     /**
      * 是否Android设备
+     * @param string $agent 客户端头信息
      * @return bool
      */
-    public static function isAndroid() {
-        return stripos($_SERVER['HTTP_USER_AGENT'], 'Android') !== false;
+    public static function isAndroid($agent='') {
+        return stripos($agent, 'Android') !== false;
     }
 
 

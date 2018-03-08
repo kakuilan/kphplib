@@ -256,8 +256,9 @@ class FileHelper {
      * 下载文件 (效率慢,只适应后台管理)
      * @param string $file 文件路径
      * @param int $limit 大小限制K
+     * @param string $ua 客户端头信息
      */
-    public static function downFile($file='', $limit=100){
+    public static function downFile($file='', $limit=100, $ua=''){
         if(empty($file) || !file_exists($file) || !is_file($file)) {
             die('File does not exist!');
         }
@@ -271,7 +272,7 @@ class FileHelper {
         }
 
         //中文名处理
-        $ua = $_SERVER["HTTP_USER_AGENT"];
+        if(empty($ua)) $ua = $_SERVER["HTTP_USER_AGENT"] ?? '';
         $encoded_filename = urlencode($fileName);
         $encoded_filename = str_replace("+", "%20", $encoded_filename);
 
