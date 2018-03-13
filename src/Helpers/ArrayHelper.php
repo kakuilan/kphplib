@@ -250,7 +250,11 @@ class ArrayHelper {
         foreach ($data as $j=>$item) {
             $check = 0;
             foreach ($condition as $k => $v) {
-                if (isset($item[$k]) && $item[$k] == $v) $check++;
+                if(is_bool($v) && $v) {
+                    $check++;
+                }elseif (isset($item[$k]) && $item[$k] == $v) {
+                    $check++;
+                }
             }
 
             if ($check == $match) {
@@ -277,7 +281,11 @@ class ArrayHelper {
         foreach ($data as $j=>$item) {
             $check = 0;
             foreach ($condition as $k => $v) {
-                if (isset($item[$k]) && $item[$k] == $v) $check++;
+                if(is_bool($v) && $v) {
+                    $check++;
+                }elseif (isset($item[$k]) && $item[$k] == $v) {
+                    $check++;
+                }
             }
 
             if ($check == $match) {
