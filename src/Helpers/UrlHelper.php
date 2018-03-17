@@ -102,7 +102,6 @@ class UrlHelper {
     }
 
 
-
     /**
      * 转换 URL：从字符串变成超链接
      * @param string $text
@@ -131,6 +130,22 @@ class UrlHelper {
     }
 
 
+    /**
+     * 检查URL是否正常存在
+     * @param string $url
+     * @return bool
+     */
+    public static function checkUrlExists($url='') {
+        if(empty($url)) return false;
+        if(!stripos($url, '://')) {
+            $url = 'http://'. $url;
+        }
+        if(!ValidateHelper::isUrl($url)) return false;
+
+        $header = get_headers($url, true);
+
+        return isset($header[0]) && (strpos($header[0], '200') || strpos($header[0], '304'));
+    }
 
 
 }

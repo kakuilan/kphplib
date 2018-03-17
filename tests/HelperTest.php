@@ -10,12 +10,13 @@
 namespace Lkk\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Lkk\LkkHttp;
-use Lkk\Helpers\DirectoryHelper;
-use Lkk\Helpers\EncryptHelper;
-use Lkk\Helpers\ValidateHelper;
 use Lkk\Helpers\ArrayHelper;
 use Lkk\Helpers\CommonHelper;
+use Lkk\Helpers\DirectoryHelper;
+use Lkk\Helpers\EncryptHelper;
+use Lkk\Helpers\UrlHelper;
+use Lkk\Helpers\ValidateHelper;
+use Lkk\LkkHttp;
 
 class HelperTest extends TestCase {
 
@@ -99,6 +100,21 @@ class HelperTest extends TestCase {
         $ip2 = long2ip($long2);
 
         $this->assertEquals($ip, $ip2);
+    }
+
+
+    /**
+     * 测试url是否正常存在
+     */
+    public function testUrlExist() {
+        $url1 = 'http://ozr8g8dil.bkt.clouddn.com/TXVideo_20180208_200427.png';
+        $url2 = 'baidu.com';
+
+        $res1 = UrlHelper::checkUrlExists($url1);
+        $res2 = UrlHelper::checkUrlExists($url2);
+
+        $this->assertFalse($res1);
+        $this->assertTrue($res2);
     }
 
 
