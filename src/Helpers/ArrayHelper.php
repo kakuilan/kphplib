@@ -298,4 +298,25 @@ class ArrayHelper {
     }
 
 
+    /**
+     * 数组按2个字段去排序
+     * @param array $array 多维数组
+     * @param string $filed1 排序字段1
+     * @param string $type1 SORT_ASC or SORT_DESC
+     * @param string $filed2 排序字段2
+     * @param string $type2 SORT_ASC or SORT_DESC
+     * @return array|bool
+     */
+    public static function sortByTwoFiled($data, $filed1, $type1, $filed2, $type2) {
+        if (count($data) <= 0) {
+            return $data;
+        }
+        foreach ($data as $key => $value) {
+            $temp_array1[$key] = $value[$filed1];
+            $temp_array2[$key] = $value[$filed2];
+        }
+        array_multisort($temp_array1, $type1, $temp_array2, $type2, $data);
+        return $data;
+    }
+
 }
