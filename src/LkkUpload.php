@@ -66,15 +66,16 @@ class LkkUpload {
      * @param array $defaultParams 默认参数
      */
     public function __construct($defaultParams = []) {
+        $this->webDir = '';
         if(!empty($defaultParams)) {
             if(isset($defaultParams['savePath']))       $this->savePath     = self::formatDir($defaultParams['savePath']);
+            if(isset($defaultParams['webDir']))         $this->webDir       = self::formatDir($defaultParams['webDir']);
             if(isset($defaultParams['allowType']))      $this->allowType    = $defaultParams['allowType'];
             if(isset($defaultParams['isOverwrite']))    $this->isOverwrite  = (bool)$defaultParams['isOverwrite'];
             if(isset($defaultParams['isRename']))       $this->isRename     = (bool)$defaultParams['isRename'];
             if(isset($defaultParams['maxSize']))        $this->maxSize      = (int)$defaultParams['maxSize'];
         }
 
-        $this->webDir = '/home/www/';
     }
 
 
@@ -194,8 +195,11 @@ class LkkUpload {
             $this->fileInfo['saveName']    = empty($this->fileInfo['newName']) ? self::escapeStr($filename) : $this->fileInfo['newName'];
             $this->fileInfo['fileSize']    = $file['size'];
             $this->fileInfo['fileType']    = self::getExtention($filename);
+            $this->fileInfo['fileTmpName'] = $file['tmp_name'];
             $this->errorCode               = $file['error'];
 
+            $this->fileInfo = array_merge($this->fileInfo, $file);
+            unset($file);
             return true;
         }
         return false;
@@ -300,7 +304,7 @@ class LkkUpload {
      */
     public static function formatDir($dir) {
         $dir = str_replace(["'",'#','=','`','$','%','&',';'], '', $dir);
-        return rtrim(preg_replace('/(\/){2,}|(\\\){1,}/', '/', $dir), '/');
+        return rtrim(preg_replace('/(\/){2,}|(\\\){1,}/', '/', $dir), ' /') . '/';
     }
 
 
@@ -400,10 +404,11 @@ class LkkUpload {
         $this->result = [
             'status' => (bool)($this->errorCode==99), //上传结果
             'info' => $this->errorInfo[$this->errorCode], //提示信息
-            'absolutePath' => $this->params['savePath'] . $this->fileInfo['saveName'], //绝对路径
+            'absolutePath' => $this->savePath . $this->fileInfo['saveName'], //绝对路径
             'relativePath' => str_replace($this->webDir, '', $this->params['savePath']) . $this->fileInfo['saveName'], //相对WEB目录路径
             'name' => $this->fileInfo['saveName'], //保存的文件名
             'size' => $this->fileInfo['fileSize'], //文件大小,单位bit
+            'ext'  => $this->fileInfo['fileType'], //文件类型,扩展名
         ];
 
         return $this->result;
