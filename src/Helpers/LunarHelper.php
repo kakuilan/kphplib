@@ -35,9 +35,9 @@ class LunarHelper {
             case "02":
                 if($day<20){$res='水瓶';}else{$res='双鱼';} break;
             case "03":
-                if($day<21){$res='双鱼';}else{$res='牧羊';} break;
+                if($day<21){$res='双鱼';}else{$res='白羊';} break;
             case "04":
-                if($day<20){$res='牧羊';}else{$res='金牛';} break;
+                if($day<20){$res='白羊';}else{$res='金牛';} break;
             case "05":
                 if($day<21){$res='金牛';}else{$res='双子';} break;
             case "06":
