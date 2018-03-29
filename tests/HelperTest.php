@@ -118,5 +118,16 @@ class HelperTest extends TestCase {
     }
 
 
+    /**
+     * 测试格式化目录
+     */
+    public function testFormatDir() {
+        $dir = '\\\home////hello\\\\world?';
+        $res = DirectoryHelper::formatDir($dir);
+
+        $this->assertFalse(strpos($res, '\\'));
+    }
+
+
 
 }

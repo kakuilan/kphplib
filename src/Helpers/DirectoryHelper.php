@@ -207,8 +207,8 @@ class DirectoryHelper {
      * @return string
      */
     public static function formatDir($dir='') {
-        $ds = str_replace('\\', '/', DIRECTORY_SEPARATOR);
-        return rtrim(str_replace('\\', $ds, $dir), DIRECTORY_SEPARATOR).$ds;
+        $dir = str_replace(["'",'#','=','`','$','%','&',';','|'], '', $dir);
+        return rtrim(preg_replace('/(\/){2,}|(\\\){1,}/', '/', $dir), ' /　') . '/';
     }
 
 
