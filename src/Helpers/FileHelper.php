@@ -314,32 +314,34 @@ class FileHelper {
 
     /**
      * 将图片文件转换为base64编码
-     * @param string $img_file 图片绝对路径
+     * @param string $imgFile 本地图片路径
      * @return string
      */
-    public static function img2Base64($img_file) {
-        $img_base64 = '';
-        $img_info = getimagesize($img_file);            //取得图片的大小，类型等
-        $fp = fopen($img_file,"r");                     //图片是否可读权限
-        if($fp){
-            $file_content = chunk_split(base64_encode(fread($fp,filesize($img_file))));//base64编码
-            $img_type = 'jpg';
-            switch($img_info[2]){           //判读图片类型
-                case 1:
-                    $img_type="gif";
+    public static function img2Base64($imgFile='') {
+        if(empty($imgFile) || !file_exists($imgFile)) return '';
+        $string = '';
+        $imgInfo = getimagesize($imgFile); //取得图片的大小，类型等
+        $fp = fopen($imgFile, 'r');
+        if($fp) {
+            $fileContent = chunk_split(base64_encode(fread($fp,filesize($imgFile))));//base64编码
+            $imgType = 'jpg';
+            $typeNum = $imgInfo[2] ?? '';
+            switch ($typeNum) {
+                case 1 :
+                    $imgType = 'gif';
                     break;
-                case 2:
-                    $img_type="jpg";
+                case 2 :
+                    $imgType = 'jpg';
                     break;
-                case 3:
-                    $img_type="png";
+                case 3 :
+                    $imgType = 'png';
                     break;
             }
-            $img_base64 = 'data:image/'.$img_type.';base64,'.$file_content;//合成图片的base64编码
+            $string = 'data:image/'.$imgType.';base64,'.$fileContent;//合成图片的base64编码
             fclose($fp);
         }
 
-        return $img_base64;         //返回图片的base64
+        return $string;
     }
 
 
