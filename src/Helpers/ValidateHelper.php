@@ -373,13 +373,12 @@ class ValidateHelper {
      */
     public static function isBase64Image($string='') {
         if(empty($string) || !stripos($string,'base64')) return false;
-        if(!preg_match('/^(data:\s*image\/(\w+);base64,)/', $string, $match)) {
+        if(!preg_match('/^(data:\s*(image|img)\/(\w+);base64,)/i', $string, $match)) {
             return false;
         }
 
         return true;
     }
-
 
 
     /**

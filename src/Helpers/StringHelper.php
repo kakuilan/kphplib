@@ -570,6 +570,20 @@ class StringHelper {
     }
 
 
+    /**
+     * 统计base64字符串大小(字节)
+     * @param string $string base64字符串
+     * @return int
+     */
+    public static function countBase64Byte($string='') {
+        if(empty($string)) return 0;
+        $string = preg_replace('/^(data:\s*(image|img)\/(\w+);base64,)/', '', $string);
+        $string = str_replace('=','', $string);
+        $len = strlen($string);
+        $res = intval($len * (3/4));
+        return $res;
+    }
+
 
 
 
