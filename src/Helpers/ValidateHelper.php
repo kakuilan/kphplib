@@ -367,6 +367,22 @@ class ValidateHelper {
 
 
     /**
+     * 是否base64编码的图片
+     * @param string $string
+     * @return bool
+     */
+    public static function isBase64Image($string='') {
+        if(empty($string) || !stripos($string,'base64')) return false;
+        if(!preg_match('/^(data:\s*image\/(\w+);base64,)/', $string, $match)) {
+            return false;
+        }
+
+        return true;
+    }
+
+
+
+    /**
      * 用于判断文件后缀是否是PHP、EXE类的可执行文件
      * @param string $file 文件路径
      * @return bool
