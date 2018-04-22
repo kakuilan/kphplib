@@ -14,23 +14,25 @@ class DateHelper {
 
 
     /**
-     * 简短时间格式
+     * 格式化日期时间
      * @param int $datetemp 时间戳
      * @param string $formate
      * @return mixed
      */
-    public static function smartDate($datetemp=0, $formate = 'Y-n-j H:i') {
-        $sec = time() - $datetemp;
-        $hover = floor($sec / 3600);
-        if ($hover == 0) {
+    public static function formatDatetime($datetemp=0, $formate = 'Y-n-j H:i') {
+        $sec = time() - (is_numeric($datetemp) ? $datetemp : strtotime($datetemp));
+        $hour = floor($sec / 3600);
+        if ($hour == 0) {
             $min = floor($sec / 60);
             if ($min == 0) {
                 $res = '刚刚';
             } else {
-                $res = $min . ' 分钟前';
+                $res = $min . '分钟前';
             }
-        } elseif ($hover < 24) {
-            $res = $hover . ' 小时前';
+        } elseif ($hour < 24) {
+            $res = $hour . '小时前';
+        } elseif ($hour < (24*10)) {
+            $res = $hour . '天前';
         } else {
             $res = date($formate, $datetemp);
         }
@@ -45,12 +47,14 @@ class DateHelper {
      * @param int $year
      * @return int
      */
-    public static function getMonthDayNum($month=1, $year=0) {
+    public static function getMonthDays($month=null, $year=null) {
         $months_map = [1=>31, 3=>31, 4=>30, 5=>31, 6=>30, 7=>31, 8=>31, 9=>30, 10=>31, 11=>30, 12=>31];
+        if(!is_numeric($month) || empty($month)) $month = date('n');
+        if(!is_numeric($year) || empty($year)) $year = date('Y');
+
         if (array_key_exists($month, $months_map)) {
             return $months_map[$month];
         } else {
-            if($year==0) $year = date('Y');
             if ($year % 100 === 0) {
                 if ($year % 400 === 0) {
                     return 29;
