@@ -369,7 +369,7 @@ class ValidateHelper {
     /**
      * 是否base64编码的图片
      * @param string $string
-     * @return bool
+     * @return bool|array
      */
     public static function isBase64Image($string='') {
         if(empty($string) || !stripos($string,'base64')) return false;
@@ -377,7 +377,14 @@ class ValidateHelper {
             return false;
         }
 
-        return true;
+        /*$match = [
+            0 => 'data:img/jpg;base64,',
+            1 => 'data:img/jpg;base64,',
+            2 => 'img',
+            3 => 'jpg',
+        ];*/
+
+        return $match;
     }
 
 
