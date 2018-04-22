@@ -32,7 +32,7 @@ class DateHelper {
         } elseif ($hour < 24) {
             $res = $hour . '小时前';
         } elseif ($hour < (24*10)) {
-            $res = $hour . '天前';
+            $res = intval($hour/24) . '天前';
         } else {
             $res = date($formate, $datetemp);
         }
