@@ -319,4 +319,31 @@ class ArrayHelper {
         return $data;
     }
 
+
+    /**
+     * 数组按3个字段去排序
+     * @param $data
+     * @param $filed1
+     * @param $type1
+     * @param $filed2
+     * @param $type2
+     * @param $filed3
+     * @param $type3
+     * @return mixed
+     */
+    public static function sortByThreeFiled($data, $filed1, $type1, $filed2, $type2, $filed3, $type3) {
+        if (count($data) <= 0) {
+            return $data;
+        }
+
+        foreach ($data as $key => $value) {
+            $temp_array1[$key] = $value[$filed1];
+            $temp_array2[$key] = $value[$filed2];
+            $temp_array3[$key] = $value[$filed3];
+        }
+        array_multisort($temp_array1, $type1, $temp_array2, $type2, $temp_array3, $type3, $data);
+        return $data;
+    }
+
+
 }
