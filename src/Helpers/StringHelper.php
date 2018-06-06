@@ -259,7 +259,7 @@ class StringHelper {
      * 获取相似度最高的字符串
      * @param string $input 要比较的字符串
      * @param array $words 要查找的字符串数组
-     * @return mixed|null
+     * @return array
      */
     public static function getClosestWord($input='', $words=[]) {
         $shortest = -1;
@@ -277,7 +277,12 @@ class StringHelper {
             }
         }
 
-        return $closest;
+        $res = [
+            'word' => $closest,
+            'shortest' => $shortest,
+        ];
+
+        return $res;
     }
 
 
