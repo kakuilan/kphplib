@@ -89,7 +89,26 @@ class LkkRedisQueueService extends LkkService {
         ];
         $key = md5(json_encode($conf));
 
-        if(is_null($redisArr) || !isset($redisArr[$key])) {
+        $connInfo = is_null($redisArr) ? [] : ($redisArr[$key] ?? []);
+        $now = time();
+        $expireTime = $now - 3600;
+
+        $pingRes = false;
+        if($connInfo) {
+            if(isset($connInfo['first_connect_time']) && isset($connInfo['redis'])) {
+                $pingRes = true;
+                if($connInfo['first_connect_time']<$expireTime) {
+                    try {
+                        $ping = $connInfo['redis']->ping();
+                        $pingRes = (strpos($ping, "PONG") !== false);
+                    }catch (\Throwable $e) {
+                        $pingRes = false;
+                    }
+                }
+            }
+        }
+
+        if(empty($connInfo) || !$pingRes) {
             $redis = new \Redis();
             $persistentId = self::getPersistentId();
             $redis->pconnect($conf['host'], $conf['port'], self::$timeout, $persistentId);
@@ -101,10 +120,16 @@ class LkkRedisQueueService extends LkkService {
             $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
             $redis->select($selectDb);
 
-            $redisArr[$key] = $redis;
-        }
+            $connInfo = [
+                'first_connect_time' => $now,
+                'redis' => $redis,
+            ];
 
-        return $redisArr[$key];
+            $redisArr[$key] = $connInfo;
+        }
+        unset($now, $conf);
+
+        return $connInfo['redis'] ?? null;
     }
 
 

@@ -26,7 +26,7 @@ class RedisQueueTest extends TestCase {
      * 测试实例化
      */
     public function testInstance() {
-        $queue = LkkRedisQueueService::instance();
+        $queue = LkkRedisQueueService::getInstance();
         $check = ($queue instanceof LkkRedisQueueService);
 
         $this->assertTrue($check);
