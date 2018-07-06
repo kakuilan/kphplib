@@ -91,7 +91,8 @@ class LkkRedisQueueService extends LkkService {
 
         $connInfo = is_null($redisArr) ? [] : ($redisArr[$key] ?? []);
         $now = time();
-        $expireTime = $now - 3600;
+        $socketTimeout = ini_get('default_socket_timeout');
+        $expireTime = $now - ($socketTimeout>0 ? $socketTimeout : 300);
 
         $pingRes = false;
         if($connInfo) {
