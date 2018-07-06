@@ -125,6 +125,9 @@ class UrlHelper {
      * @return mixed
      */
     public static function formatUrl($url) {
+        if(!stripos($url, '://')) {
+            $url = 'http://'. $url;
+        }
         $url = str_replace("\\", "/", $url);
         return preg_replace('/([^:])[\/]{2,}/','$1/', $url);
     }
