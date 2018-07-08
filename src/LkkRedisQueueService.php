@@ -98,7 +98,7 @@ class LkkRedisQueueService extends LkkService {
         if($connInfo) {
             if(isset($connInfo['first_connect_time']) && isset($connInfo['redis'])) {
                 $pingRes = true;
-                if($connInfo['first_connect_time']<$expireTime) {
+                if($connInfo['first_connect_time'] > $expireTime) {
                     try {
                         $ping = $connInfo['redis']->ping();
                         $pingRes = (strpos($ping, "PONG") !== false);
