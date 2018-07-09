@@ -42,8 +42,8 @@ class LkkRedisQueueService extends LkkService {
     public function __construct(array $vars = []) {
         parent::__construct($vars);
 
-        $redisConf = isset($vars['redisConf']) ? $vars['redisConf'] : [];
-        $this->redis = self::getRedisClient($redisConf);
+        $this->redisConf = isset($vars['redisConf']) ? $vars['redisConf'] : [];
+        //$this->redis = self::getRedisClient($this->redisConf);
     }
 
 
@@ -194,6 +194,7 @@ class LkkRedisQueueService extends LkkService {
      * @return $this
      */
     public function resetRedis(array $conf) {
+        if(empty($conf)) $conf = $this->redisConf;
         $this->redis = self::getRedisClient($conf);
         return $this;
     }
@@ -215,7 +216,7 @@ class LkkRedisQueueService extends LkkService {
 
         $allKey = self::getHashTableKey();
         $queKey = self::$prefix ."{$queueName}_{$type}";
-        $res = $this->redis->hSetNx($allKey, $queueName, $queKey);
+        $res = self::getRedisClient($this->redisConf)->hSetNx($allKey, $queueName, $queKey);
         if($res) {
             $res = $queKey;
         }else{
@@ -232,7 +233,7 @@ class LkkRedisQueueService extends LkkService {
      */
     public function getAllQueueNames() {
         $allKey = self::getHashTableKey();
-        $res = $this->redis->hGetAll($allKey);
+        $res = self::getRedisClient($this->redisConf)->hGetAll($allKey);
         return empty($res) ? [] : $res;
     }
 
@@ -243,7 +244,7 @@ class LkkRedisQueueService extends LkkService {
      */
     public function countAllQueueNames() {
         $allKey = self::getHashTableKey();
-        $res = (int)$this->redis->hLen($allKey);
+        $res = (int)self::getRedisClient($this->redisConf)->hLen($allKey);
         return $res;
     }
 
@@ -260,7 +261,7 @@ class LkkRedisQueueService extends LkkService {
         $queueName = strtolower($queueName);
         if(!isset(self::$allQuekeys[$queueName])) {
             $allKey = self::getHashTableKey();
-            $res = $this->redis->hExists($allKey, $queueName);
+            $res = self::getRedisClient($this->redisConf)->hExists($allKey, $queueName);
         }else{
             $res = true;
         }
@@ -281,7 +282,7 @@ class LkkRedisQueueService extends LkkService {
         $queueName = strtolower($queueName);
         if(!isset(self::$allQuekeys[$queueName])) {
             $allKey = self::getHashTableKey();
-            $queueKey = $this->redis->hGet($allKey, $queueName);
+            $queueKey = self::getRedisClient($this->redisConf)->hGet($allKey, $queueName);
         }else{
             $queueKey = self::$allQuekeys[$queueName];
         }
@@ -362,10 +363,10 @@ class LkkRedisQueueService extends LkkService {
 
         $baseInfo = $this->getQueueBaseInfo($queueName);
         $allKey = self::getHashTableKey();
-        $res = $this->redis->hDel($allKey, $baseInfo->queueKey);
+        $res = self::getRedisClient($this->redisConf)->hDel($allKey, $baseInfo->queueKey);
         if($res) {
             unset(self::$allQuekeys[$queueName]);
-            $this->redis->del($baseInfo->queueKey);
+            self::getRedisClient($this->redisConf)->del($baseInfo->queueKey);
         }
 
         return (bool)$res;
@@ -422,9 +423,9 @@ class LkkRedisQueueService extends LkkService {
         }
 
         if($baseInfo->isSort) {
-            $res = (int)$this->redis->zCount($baseInfo->queueKey, PHP_INT_MIN, PHP_INT_MAX);
+            $res = (int)self::getRedisClient($this->redisConf)->zCount($baseInfo->queueKey, PHP_INT_MIN, PHP_INT_MAX);
         }else{
-            $res = (int)$this->redis->lLen($baseInfo->queueKey);
+            $res = (int)self::getRedisClient($this->redisConf)->lLen($baseInfo->queueKey);
         }
 
         return $res;
@@ -453,9 +454,9 @@ class LkkRedisQueueService extends LkkService {
 
         if($baseInfo->isSort) {
             $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
-            $res = $this->redis->zAdd($baseInfo->queueKey, $score, $item);
+            $res = self::getRedisClient($this->redisConf)->zAdd($baseInfo->queueKey, $score, $item);
         }else{
-            $res = $this->redis->lPush($baseInfo->queueKey, $item);
+            $res = self::getRedisClient($this->redisConf)->lPush($baseInfo->queueKey, $item);
         }
 
         return (bool)$res;
@@ -486,16 +487,16 @@ class LkkRedisQueueService extends LkkService {
         }
 
         $now = time();
-        $this->redis->multi();
+        self::getRedisClient($this->redisConf)->multi();
         foreach ($items as $k=>$item) {
             if($baseInfo->isSort) {
                 $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
-                $this->redis->zAdd($baseInfo->queueKey, $score, $item);
+                self::getRedisClient($this->redisConf)->zAdd($baseInfo->queueKey, $score, $item);
             }else{
-                $this->redis->lPush($baseInfo->queueKey, $item);
+                self::getRedisClient($this->redisConf)->lPush($baseInfo->queueKey, $item);
             }
         }
-        $mulRes = $this->redis->exec();
+        $mulRes = self::getRedisClient($this->redisConf)->exec();
         if(isset($mulRes[0]) && !empty($mulRes[0])) {
             $res = true;
         }else{
@@ -528,9 +529,9 @@ class LkkRedisQueueService extends LkkService {
 
         if($baseInfo->isSort) {
             $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
-            $res = $this->redis->zAdd($baseInfo->queueKey, $score, $item);
+            $res = self::getRedisClient($this->redisConf)->zAdd($baseInfo->queueKey, $score, $item);
         }else{
-            $res = $this->redis->rPush($baseInfo->queueKey, $item);
+            $res = self::getRedisClient($this->redisConf)->rPush($baseInfo->queueKey, $item);
         }
 
         return (bool)$res;
@@ -561,16 +562,16 @@ class LkkRedisQueueService extends LkkService {
         }
 
         $now = time();
-        $this->redis->multi();
+        self::getRedisClient($this->redisConf)->multi();
         foreach ($items as $k=>$item) {
             if($baseInfo->isSort) {
                 $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
-                $this->redis->zAdd($baseInfo->queueKey, $score, $item);
+                self::getRedisClient($this->redisConf)->zAdd($baseInfo->queueKey, $score, $item);
             }else{
-                $this->redis->rPush($baseInfo->queueKey, $item);
+                self::getRedisClient($this->redisConf)->rPush($baseInfo->queueKey, $item);
             }
         }
-        $mulRes = $this->redis->exec();
+        $mulRes = self::getRedisClient($this->redisConf)->exec();
         if(isset($mulRes[0]) && !empty($mulRes[0])) {
             $res = true;
         }else{
@@ -603,10 +604,10 @@ class LkkRedisQueueService extends LkkService {
         }
 
         if($baseInfo->isSort) {
-            $res = $this->redis->zRange($baseInfo->queueKey, 0, 0); //从小到大排
+            $res = self::getRedisClient($this->redisConf)->zRange($baseInfo->queueKey, 0, 0); //从小到大排
             if($res) $res = $res[0];
         }else{
-            $res = $this->redis->lPop($baseInfo->queueKey);
+            $res = self::getRedisClient($this->redisConf)->lPop($baseInfo->queueKey);
         }
 
         $tranRes = false;
@@ -639,10 +640,10 @@ class LkkRedisQueueService extends LkkService {
         }
 
         if($baseInfo->isSort) {
-            $res = $this->redis->zRevRange($baseInfo->queueKey, 0, 0); //从大到小排
+            $res = self::getRedisClient($this->redisConf)->zRevRange($baseInfo->queueKey, 0, 0); //从大到小排
             if($res) $res = $res[0];
         }else{
-            $res = $this->redis->rPop($baseInfo->queueKey);
+            $res = self::getRedisClient($this->redisConf)->rPop($baseInfo->queueKey);
         }
 
         $tranRes = false;
@@ -684,17 +685,17 @@ class LkkRedisQueueService extends LkkService {
         $tranItemKey = md5(serialize($tranItemData));
 
         //redis事务
-        $this->redis->multi();
-        $this->redis->zAdd($tranQueKey, $score, $tranItemKey);
-        $this->redis->hSet($tranTabKey, $tranItemKey, $tranItemData);
+        self::getRedisClient($this->redisConf)->multi();
+        self::getRedisClient($this->redisConf)->zAdd($tranQueKey, $score, $tranItemKey);
+        self::getRedisClient($this->redisConf)->hSet($tranTabKey, $tranItemKey, $tranItemData);
         if($baseInfo->isSort) {
-            $this->redis->zRem($baseInfo->queueKey, $item);
+            self::getRedisClient($this->redisConf)->zRem($baseInfo->queueKey, $item);
         }
-        $tranRes = $this->redis->exec();
+        $tranRes = self::getRedisClient($this->redisConf)->exec();
         if(!isset($tranRes[0]) || empty($tranRes[0])) {
             $this->setError('消息加入中转失败');
-            $this->redis->hDel($tranTabKey, $tranItemKey);
-            $this->redis->zRem($tranQueKey, $tranItemKey);
+            self::getRedisClient($this->redisConf)->hDel($tranTabKey, $tranItemKey);
+            self::getRedisClient($this->redisConf)->zRem($tranQueKey, $tranItemKey);
             //重新入栈
             if(!$baseInfo->isSort) $this->push($item, $queueName);
         }else{
@@ -762,7 +763,7 @@ class LkkRedisQueueService extends LkkService {
         if(empty($key)) return $res;
 
         $tranTabKey = self::getTransTableKey();
-        $res = $this->redis->hGet($tranTabKey, $key);
+        $res = self::getRedisClient($this->redisConf)->hGet($tranTabKey, $key);
 
         return $res;
     }
@@ -778,7 +779,7 @@ class LkkRedisQueueService extends LkkService {
         if(empty($keys)) return $res;
 
         $tranTabKey = self::getTransTableKey();
-        $res = $this->redis->hmGet($tranTabKey, $keys);
+        $res = self::getRedisClient($this->redisConf)->hmGet($tranTabKey, $keys);
 
         return $res;
     }
@@ -817,19 +818,19 @@ class LkkRedisQueueService extends LkkService {
         $tranTabKey = self::getTransTableKey();
 
         //redis事务
-        $this->redis->multi();
-        $this->redis->zRem($tranQueKey, $tranItemKey);
-        $this->redis->hDel($tranTabKey, $tranItemKey);
+        self::getRedisClient($this->redisConf)->multi();
+        self::getRedisClient($this->redisConf)->zRem($tranQueKey, $tranItemKey);
+        self::getRedisClient($this->redisConf)->hDel($tranTabKey, $tranItemKey);
         if(!$procRes) { //重新入栈
             if($baseInfo->isSort) {
                 $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
-                $res = $this->redis->zAdd($baseInfo->queueKey, $score, $item);
+                $res = self::getRedisClient($this->redisConf)->zAdd($baseInfo->queueKey, $score, $item);
             }else{
-                $res = $this->redis->rPush($baseInfo->queueKey, $item);
+                $res = self::getRedisClient($this->redisConf)->rPush($baseInfo->queueKey, $item);
             }
         }
 
-        $cfmRes = $this->redis->exec();
+        $cfmRes = self::getRedisClient($this->redisConf)->exec();
         if(!isset($cfmRes[0]) || empty($cfmRes[0])) {
             $this->setError('消息确认失败');
         }else{
@@ -882,25 +883,25 @@ class LkkRedisQueueService extends LkkService {
             }
 
             //redis事务
-            $this->redis->multi();
+            self::getRedisClient($this->redisConf)->multi();
 
             foreach ($slice as $k=>$tranItemKey) {
-                $this->redis->zRem($tranQueKey, $tranItemKey);
-                $this->redis->hDel($tranTabKey, $tranItemKey);
+                self::getRedisClient($this->redisConf)->zRem($tranQueKey, $tranItemKey);
+                self::getRedisClient($this->redisConf)->hDel($tranTabKey, $tranItemKey);
 
                 if(!$procRes) { //重新入栈
                     $item = $isKey ? $sliceItems[$tranItemKey] : $items[$k];
                     if($baseInfo->isSort) {
                         $score = isset($item[self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$item[self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
-                        $res = $this->redis->zAdd($baseInfo->queueKey, $score, $item);
+                        $res = self::getRedisClient($this->redisConf)->zAdd($baseInfo->queueKey, $score, $item);
                     }else{
-                        $res = $this->redis->rPush($baseInfo->queueKey, $item);
+                        $res = self::getRedisClient($this->redisConf)->rPush($baseInfo->queueKey, $item);
                     }
                 }
 
             }
 
-            $cfmRes = $this->redis->exec();
+            $cfmRes = self::getRedisClient($this->redisConf)->exec();
             $slicNum = count($slice);
             if(!isset($cfmRes[$index]) || empty($cfmRes[$index])) {
                 $faiNum += $slicNum;
@@ -928,7 +929,7 @@ class LkkRedisQueueService extends LkkService {
             return $res;
         }
 
-        $this->redis->del($baseInfo->queueKey);
+        self::getRedisClient($this->redisConf)->del($baseInfo->queueKey);
 
         return true;
     }
@@ -943,9 +944,9 @@ class LkkRedisQueueService extends LkkService {
         $key = self::getTransLockKey($serverUniqueId);
         $now = time();
 
-        $res = $this->redis->setnx($key, $now);
+        $res = self::getRedisClient($this->redisConf)->setnx($key, $now);
         if($res) {
-            $this->redis->expire($key, self::REDIS_QUEUE_TRANS_LOCKTIM);
+            self::getRedisClient($this->redisConf)->expire($key, self::REDIS_QUEUE_TRANS_LOCKTIM);
         }
 
         return $res;
@@ -959,7 +960,7 @@ class LkkRedisQueueService extends LkkService {
      */
     public function unlockTransQueue($serverUniqueId='') {
         $key = self::getTransLockKey($serverUniqueId);
-        $res = $this->redis->del($key);
+        $res = self::getRedisClient($this->redisConf)->del($key);
         return $res;
     }
 
@@ -975,9 +976,9 @@ class LkkRedisQueueService extends LkkService {
         if(empty($queueName)) $queueName = $this->curQueName;
         $key = self::getItemProcessKey($item, $queueName);
         $now = time();
-        $res = $this->redis->setnx($key, $now);
+        $res = self::getRedisClient($this->redisConf)->setnx($key, $now);
         if($res) {
-            $this->redis->expire($key, $lockTime);
+            self::getRedisClient($this->redisConf)->expire($key, $lockTime);
         }
 
         return $res;
@@ -993,7 +994,7 @@ class LkkRedisQueueService extends LkkService {
     public function unlockItemProcess($item=[], $queueName='') {
         if(empty($queueName)) $queueName = $this->curQueName;
         $key = self::getItemProcessKey($item, $queueName);
-        $res = $this->redis->del($key);
+        $res = self::getRedisClient($this->redisConf)->del($key);
         return $res;
     }
 
@@ -1013,7 +1014,7 @@ class LkkRedisQueueService extends LkkService {
 
         $tranQueKey = self::getTransQueueKey();
         $tranTabKey = self::getTransTableKey();
-        $len = (int)$this->redis->hLen($tranTabKey);
+        $len = (int)self::getRedisClient($this->redisConf)->hLen($tranTabKey);
         if($len<=0) {
             $this->setError('中转队列为空');
             $this->unlockTransQueue($serverUniqueId);
@@ -1026,7 +1027,7 @@ class LkkRedisQueueService extends LkkService {
         $successNum = 0;
 
         try{
-            while ($list = $this->redis->zRange($tranQueKey, 0, 0, true)) {
+            while ($list = self::getRedisClient($this->redisConf)->zRange($tranQueKey, 0, 0, true)) {
                 $itemKey = null;
                 $time = 0;
                 foreach ($list as $itemKey=>$time) {
@@ -1039,9 +1040,9 @@ class LkkRedisQueueService extends LkkService {
                     break;
                 }
 
-                $tranItem = $this->redis->hGet($tranTabKey, $itemKey);
+                $tranItem = self::getRedisClient($this->redisConf)->hGet($tranTabKey, $itemKey);
                 if(empty($tranItem)) {
-                    $this->redis->zRem($tranQueKey, $itemKey);
+                    self::getRedisClient($this->redisConf)->zRem($tranQueKey, $itemKey);
                     $this->setError('消息不存在');
                     continue;
                 }
@@ -1050,16 +1051,16 @@ class LkkRedisQueueService extends LkkService {
                     //检查原队列是否存在
                     $oldQueInfo = $this->getQueueBaseInfo($tranItem['queueName']);
                     if($oldQueInfo) { //超时的重新入栈
-                        $this->redis->multi();
-                        $this->redis->hDel($tranTabKey, $itemKey);
-                        $this->redis->zRem($tranQueKey, $itemKey);
+                        self::getRedisClient($this->redisConf)->multi();
+                        self::getRedisClient($this->redisConf)->hDel($tranTabKey, $itemKey);
+                        self::getRedisClient($this->redisConf)->zRem($tranQueKey, $itemKey);
                         if($oldQueInfo->isSort) {
                             $score = isset($tranItem['item'][self::REDIS_QUEUE_SCORE_FIELD]) ? (float)$tranItem['item'][self::REDIS_QUEUE_SCORE_FIELD] : microtime(true);
-                            $this->redis->zAdd($oldQueInfo->queueKey, $score, $tranItem['item']);
+                            self::getRedisClient($this->redisConf)->zAdd($oldQueInfo->queueKey, $score, $tranItem['item']);
                         }else{
-                            $this->redis->rPush($oldQueInfo->queueKey, $tranItem['item']);
+                            self::getRedisClient($this->redisConf)->rPush($oldQueInfo->queueKey, $tranItem['item']);
                         }
-                        $addRes = $this->redis->exec();
+                        $addRes = self::getRedisClient($this->redisConf)->exec();
                         if(!isset($addRes[0]) || empty($addRes[0])) {
                             $this->setError('消息重新入栈失败');
                         }else{
@@ -1067,8 +1068,8 @@ class LkkRedisQueueService extends LkkService {
                         }
                     }else{ //丢弃
                         $this->setError('消息原队列不存在');
-                        $this->redis->hDel($tranTabKey, $itemKey);
-                        $this->redis->zRem($tranQueKey, $itemKey);
+                        self::getRedisClient($this->redisConf)->hDel($tranTabKey, $itemKey);
+                        self::getRedisClient($this->redisConf)->zRem($tranQueKey, $itemKey);
                     }
                 }else{
                     $this->setError('消息未过期');
