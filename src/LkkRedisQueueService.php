@@ -92,19 +92,18 @@ class LkkRedisQueueService extends LkkService {
         $connInfo = is_null($redisArr) ? [] : ($redisArr[$key] ?? []);
         $now = time();
         $socketTimeout = ini_get('default_socket_timeout');
-        $expireTime = $now - ($socketTimeout>0 ? $socketTimeout : 300);
+        $lastTime = $connInfo['first_connect_time'] ?? 0;
+        $maxTime = $lastTime + $socketTimeout;
 
         $pingRes = false;
         if($connInfo) {
-            if(isset($connInfo['first_connect_time']) && isset($connInfo['redis'])) {
-                $pingRes = true;
-                if($connInfo['first_connect_time'] > $expireTime) {
-                    try {
-                        $ping = $connInfo['redis']->ping();
-                        $pingRes = (strpos($ping, "PONG") !== false);
-                    }catch (\Throwable $e) {
-                        $pingRes = false;
-                    }
+            $pingRes = true;
+            if(!($now>=$lastTime && $now<$maxTime) ) {
+                try {
+                    $ping = $connInfo['redis']->ping();
+                    $pingRes = (strpos($ping, "PONG") !== false);
+                }catch (\Throwable $e) {
+                    $pingRes = false;
                 }
             }
         }
@@ -112,7 +111,7 @@ class LkkRedisQueueService extends LkkService {
         if(empty($connInfo) || !$pingRes) {
             $redis = new \Redis();
             $persistentId = self::getPersistentId();
-            $redis->pconnect($conf['host'], $conf['port'], self::$timeout, $persistentId);
+            $redis->pconnect($conf['host'], $conf['port'], 0, $persistentId);
             if(isset($conf['password']) && !empty($conf['password'])) {
                 $redis->auth($conf['password']);
             }
@@ -128,7 +127,7 @@ class LkkRedisQueueService extends LkkService {
 
             $redisArr[$key] = $connInfo;
         }
-        unset($now, $conf);
+        unset($key, $conf, $now, $socketTimeout, $lastTime, $maxTime, $pingRes, $redis);
 
         return $connInfo['redis'] ?? null;
     }
