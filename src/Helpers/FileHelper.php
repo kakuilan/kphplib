@@ -352,6 +352,7 @@ class FileHelper {
     public static function getMimes() {
         return [
             '323' => 'text/h323',
+            '7z' => 'application/x-7z-compressed',
             'acx' => 'application/internet-property-stream',
             'ai' => 'application/postscript',
             'aif' => 'audio/x-aiff',
@@ -367,6 +368,8 @@ class FileHelper {
             'bcpio' => 'application/x-bcpio',
             'bin' => 'application/octet-stream',
             'bmp' => 'image/bmp',
+            'bz' => 'application/x-bzip',
+            'bz2' => 'application/x-bzip2',
             'c' => 'text/plain',
             'cat' => 'application/vnd.ms-pkiseccat',
             'cdf' => 'application/x-cdf',
@@ -437,6 +440,7 @@ class FileHelper {
             'movie' => 'video/x-sgi-movie',
             'mp2' => 'video/mpeg',
             'mp3' => 'audio/mpeg',
+            'mp4' => 'video/mp4',
             'mpa' => 'video/mpeg',
             'mpe' => 'video/mpeg',
             'mpeg' => 'video/mpeg',
@@ -475,6 +479,7 @@ class FileHelper {
             'qt' => 'video/quicktime',
             'ra' => 'audio/x-pn-realaudio',
             'ram' => 'audio/x-pn-realaudio',
+            'rar' => 'application/x-rar-compressed',
             'ras' => 'image/x-cmu-raster',
             'rgb' => 'image/x-rgb',
             'rmi' => 'audio/mid',
