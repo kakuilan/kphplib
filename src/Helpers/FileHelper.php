@@ -579,7 +579,8 @@ class FileHelper {
     public static function getFileMime($filePath='', $real=false) {
         $res = '';
         if($real) {
-            $handle = finfo_open(FILEINFO_MIME, '/usr/share/file/magic');
+            $magicFile = file_exists('/usr/share/file/magic') ? '/usr/share/file/magic' : null;
+            $handle = finfo_open(FILEINFO_MIME, $magicFile);
             $res = finfo_file($handle, $filePath);
             finfo_close($handle);
         }else{
