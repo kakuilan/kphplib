@@ -86,14 +86,17 @@ class LkkRedisQueueService extends LkkService {
             'port' => 6379,
             'password' => null,
             'select' => null, //哪个库
+            'wait_timeout' => 120, //保持连接超时,秒
         ];
         $key = md5(json_encode($conf));
 
         $connInfo = is_null($redisArr) ? [] : ($redisArr[$key] ?? []);
         $now = time();
         $socketTimeout = ini_get('default_socket_timeout');
+        $waitTimeout = intval($conf['wait_timeout'] ?? 120);
+        if($socketTimeout>0) $waitTimeout = min($socketTimeout, $waitTimeout);
         $lastTime = $connInfo['first_connect_time'] ?? 0;
-        $maxTime = $lastTime + $socketTimeout;
+        $maxTime = $lastTime + $waitTimeout;
 
         $pingRes = false;
         if($connInfo) {
