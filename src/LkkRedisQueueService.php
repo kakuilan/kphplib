@@ -974,13 +974,22 @@ class LkkRedisQueueService extends LkkService {
      * @param string $queueName 队列名
      * @return bool
      */
-    public function getItemProcessLock($item=[], $lockTime=30, $queueName='') {
+    public function getItemProcessLock($item=[], $lockTime=10, $queueName='') {
+        $res = true;
         if(empty($queueName)) $queueName = $this->curQueName;
         $key = self::getItemProcessKey($item, $queueName);
         $now = time();
-        $res = self::getRedisClient($this->redisConf)->setnx($key, $now);
-        if($res) {
+        $data = $now + $lockTime;
+
+        if($ret = self::getRedisClient($this->redisConf)->setnx($key, $data)) {
             self::getRedisClient($this->redisConf)->expire($key, $lockTime);
+        }else{
+            $val = self::getRedisClient($this->redisConf)->get($key);
+            if(is_numeric($val) && $val> $now) {
+                $res = false;
+            }else{
+                $redis->set($key, $data, $lockTime);
+            }
         }
 
         return $res;
