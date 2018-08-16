@@ -75,6 +75,16 @@ class ValidateHelper {
 
 
     /**
+     * 是否二进制数据
+     * @param $str
+     * @return bool
+     */
+    public static function isBinary($str) {
+        return preg_match('~[^\x20-\x7E\t\r\n]~', $str) > 0;
+    }
+
+
+    /**
      * 是否邮箱
      * @param string $email
      * @param int $minLen 字符串最小长度
