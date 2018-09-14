@@ -11,7 +11,7 @@ namespace Lkk;
 
 class LkkService extends LkkObject {
 
-    protected $errno, $error;
+    public $errno, $error;
     protected static $instance; //供静态绑定
     protected static $_instance; //供最终子类绑定
 
