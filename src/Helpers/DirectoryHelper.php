@@ -19,6 +19,7 @@ class DirectoryHelper {
      * @return bool
      */
     public static function mkdirDeep($dir='', $mode=0766) {
+        if(empty($dir)) return false;
         if(is_dir($dir) && chmod($dir, $mode)) {
             return true;
         } elseif (mkdir($dir, $mode, true)) {//第三个参数为true即可以创建多级目录
