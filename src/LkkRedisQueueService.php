@@ -988,7 +988,7 @@ class LkkRedisQueueService extends LkkService {
             if(is_numeric($val) && $val> $now) {
                 $res = false;
             }else{
-                $redis->set($key, $data, $lockTime);
+                self::getRedisClient($this->redisConf)->set($key, $data, $lockTime);
             }
         }
 
