@@ -148,7 +148,7 @@ class DirectoryHelper {
         $tree = array();
         $objects = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::SELF_FIRST);
         foreach ($objects as $single=>$object) {
-            $checkNull = strpos(substr($single, -3), '\\.'); //检查文件是否 . 或者 ..
+            $checkNull = strpos(substr($single, -3), "/."); //检查文件是否 . 或者 ..
             if($checkNull !==false) continue;
 
             //先删除文件
