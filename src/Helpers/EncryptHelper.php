@@ -35,7 +35,7 @@ class EncryptHelper {
 
 
     /**
-     * UC的加解密函数
+     * UC的加解密函数(加密结果可变)
      * @param string $string 待操作字符串
      * @param string $operation 操作类型:DECODE 解密, ENCODE 加密
      * @param string $key 密钥
@@ -144,6 +144,72 @@ class EncryptHelper {
         }
 
         return $h1;
+    }
+
+
+    /**
+     * 简单加密(可逆,加密结果恒定不变)
+     * @param string $data 待加密数据
+     * @param string $key 密钥
+     * @return string
+     */
+    public static function easyEncrypt($data, $key) {
+        $data   =   json_encode($data);
+        $key	=	md5($key);
+        $x		=	0;
+        $len	=	strlen($data);
+        $l		=	strlen($key);
+        $str = $char   = '';
+        for ($i = 0; $i < $len; $i++) {
+            if ($x == $l)
+            {
+                $x = 0;
+            }
+            $char .= $key{$x};
+            $x++;
+        }
+        for ($i = 0; $i < $len; $i++) {
+            $str .= chr(ord($data{$i}) + (ord($char{$i})) % 256);
+        }
+
+        return base64_encode($str);
+    }
+
+
+    /**
+     * 简单解密
+     * @param string $data 待解密数据
+     * @param string $key 密钥
+     * @return mixed
+     */
+    public static function easyDecrypt($data, $key) {
+        $data = json_encode($data);
+        $key = md5($key);
+        $x = 0;
+        $data = base64_decode($data);
+        $len = strlen($data);
+        $l = strlen($key);
+        $str = $char   = '';
+        for ($i = 0; $i < $len; $i++) {
+            if ($x == $l)
+            {
+                $x = 0;
+            }
+            $char .= substr($key, $x, 1);
+            $x++;
+        }
+        for ($i = 0; $i < $len; $i++) {
+            if (ord(substr($data, $i, 1)) < ord(substr($char, $i, 1)))
+            {
+                $str .= chr((ord(substr($data, $i, 1)) + 256) - ord(substr($char, $i, 1)));
+            }
+            else
+            {
+                $str .= chr(ord(substr($data, $i, 1)) - ord(substr($char, $i, 1)));
+            }
+        }
+
+        return json_decode($str, true);
     }
 
 
