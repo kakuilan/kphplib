@@ -322,6 +322,20 @@ class ValidateHelper {
 
 
     /**
+     * 是否已某字符串结尾
+     * @param string $string 源字符串
+     * @param string $word 要查找的字符串
+     * @return bool
+     */
+    public static function isEndsWith(string $string, string $word) {
+        $strlen = strlen($string);
+        $wordlen = strlen($word);
+        if ($wordlen > $strlen) return false;
+        return substr_compare($string, $word, $strlen - $wordlen, $wordlen) === 0;
+    }
+
+
+    /**
      * 是否iPhone
      * @param string $agent 客户端头信息
      * @return bool
