@@ -478,4 +478,15 @@ class ValidateHelper {
     }
 
 
+    /**
+     * 是否空对象
+     * @param object $obj
+     * @return bool
+     */
+    public static function isEmptyObject(object $obj) {
+        return count(get_object_vars( $obj )) == 0;
+    }
+
+
+
 }
