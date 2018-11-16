@@ -263,11 +263,20 @@ class ValidateHelper {
 
     /**
      * 是否英文字符串
-     * @param $string
+     * @param string $string
+     * @param string $case 是否检查大小写:0忽略大小写,1检查小写,2检查大写
      * @return bool
      */
-    public static function isEnglish($string) {
-        if (preg_match("/^[a-z]+$/i", $string)) {
+    public static function isEnglish($string, $case=0) {
+        if($case==1) { //小写
+            $pattern = "/^[a-z]+$/";
+        }elseif ($case==2) { //大写
+            $pattern = "/^[A-Z]+$/";
+        }else{ //忽略大小写
+            $pattern = "/^[a-z]+$/i";
+        }
+
+        if (preg_match($pattern, $string)) {
             return true;
         }
 
