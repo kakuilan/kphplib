@@ -69,7 +69,7 @@ class DirectoryHelper {
      */
     public static function getFileTree($path='', $type='all', $recursive=true){
         $path = rtrim($path, DS);
-        $tree = array();
+        $tree = [];
         // '{.,*}*' 相当于 '.*'(搜索.开头的隐藏文件)和'*'(搜索正常文件)
         foreach(glob($path.'/{.,*}*', GLOB_BRACE) as $single){
             if(is_dir($single)){
@@ -145,7 +145,7 @@ class DirectoryHelper {
      */
     public static function emptyDir($path='') {
         if(empty($path) || !is_dir($path)) return false;
-        $tree = array();
+        $tree = [];
         $objects = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::SELF_FIRST);
         foreach ($objects as $single=>$object) {
             $checkNull = strpos(substr($single, -3), "/."); //检查文件是否 . 或者 ..

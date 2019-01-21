@@ -19,7 +19,7 @@ class Promise {
     protected $state = Promise::PENDING;
     protected $value;
     protected $reason;
-    protected $subscribers = array();
+    protected $subscribers = [];
 
     public function __construct($computation = NULL) {
         if (is_callable($computation)) {
@@ -246,13 +246,13 @@ class Promise {
             function($array) {
                 $keys = array_keys($array);
                 $n = count($array);
-                $result = array();
+                $result = [];
                 if ($n === 0) {
                     return self::value($result);
                 }
                 $future = new Promise();
                 $resolve = function() use ($future, &$result, $keys) {
-                    $array = array();
+                    $array = [];
                     foreach($keys as $key) {
                         $array[$key] = $result[$key];
                     }
@@ -284,11 +284,11 @@ class Promise {
                 if ($n === 0) {
                     throw new \Exception('any(): $array must not be empty');
                 }
-                $reasons = array();
+                $reasons = [];
                 $future = new Promise();
                 $resolve = array($future, "resolve");
                 $reject = function() use ($future, &$reasons, $keys) {
-                    $array = array();
+                    $array = [];
                     foreach($keys as $key) {
                         $array[$key] = $reasons[$key];
                     }

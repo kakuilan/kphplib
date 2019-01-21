@@ -35,16 +35,17 @@ class ArrayHelper {
 
     /**
      * 对多维数组进行排序
-     * @param array $multi_array
-     * @param string $sort_key 排序键值
+     * @param array $multiArray
+     * @param string $sortKey 排序键值
      * @param int $sort 排序类型:SORT_DESC/SORT_ASC
      * @return array|bool
      */
-    public static function multiArraySort($multi_array=[], $sort_key='', $sort = SORT_DESC) {
-        if (is_array($multi_array)) {
-            foreach ($multi_array as $row_array) {
+    public static function multiArraySort($multiArray=[], $sortKey='', $sort = SORT_DESC) {
+        if (is_array($multiArray)) {
+            $keyArray = [];
+            foreach ($multiArray as $row_array) {
                 if (is_array($row_array)) {
-                    $key_array[] = $row_array[$sort_key];
+                    $keyArray[] = $row_array[$sortKey];
                 } else {
                     return false;
                 }
@@ -52,37 +53,36 @@ class ArrayHelper {
         } else {
             return false;
         }
-        array_multisort($key_array, $sort, $multi_array);
-        return $multi_array;
+        array_multisort($keyArray, $sort, $multiArray);
+        return $multiArray;
     }
 
 
     /**
      * 多维数组去重
-     * @param array $multi_array
+     * @param array $multiArray
      * @param bool $keepKey 是否保留键值
      * @return array
      */
-    public static function multiArrayUnique($multi_array=[], $keepKey=false){
-        $has_arr = array();
-        $new_arr = array();
+    public static function multiArrayUnique($multiArray=[], $keepKey=false){
+        $hasArr = $newArr = [];
 
-        foreach($multi_array as $k=>$v){
+        foreach($multiArray as $k=>$v){
             $hash = md5(json_encode($v));
-            if(in_array($hash, $has_arr)){
+            if(in_array($hash, $hasArr)){
                 continue;
             }else{
-                $has_arr[] = $hash;
+                $hasArr[] = $hash;
                 if($keepKey){
-                    $new_arr[$k] = $v;
+                    $newArr[$k] = $v;
                 }else{
-                    $new_arr[] = $v;
+                    $newArr[] = $v;
                 }
             }
         }
 
-        unset($has_arr, $multi_array);
-        return $new_arr;
+        unset($hasArr, $multiArray);
+        return $newArr;
     }
 
 
@@ -95,7 +95,7 @@ class ArrayHelper {
      * @return array
      */
     public static function arraySort($arr=[], $keys='', $type = 'desc', $keepKey=false) {
-        $keysvalue = $new_array = array();
+        $keysvalue = $newArr = [];
         foreach ($arr as $k => $v) {
             $keysvalue[$k] = $v[$keys];
         }
@@ -109,12 +109,12 @@ class ArrayHelper {
         reset($keysvalue);
         foreach ($keysvalue as $k => $v) {
             if($keepKey){
-                $new_array[$k] = $arr[$k];
+                $newArr[$k] = $arr[$k];
             }else{
-                $new_array[] = $arr[$k];
+                $newArr[] = $arr[$k];
             }
         }
-        return $new_array;
+        return $newArr;
     }
 
 
@@ -125,7 +125,7 @@ class ArrayHelper {
      * @return array
      */
     public static function arrayMapRecursive($filter='', $data=[]) {
-        $result = array();
+        $result = [];
         foreach ($data as $key => $val) {
             $result[$key] = is_array($val)
                 ? self::arrayMapRecursive($filter, $val)
@@ -192,7 +192,7 @@ class ArrayHelper {
      * @return array
      */
     private static function _combination($arr=[], $m=0, $separator='') {
-        $result = array();
+        $result = [];
         if ($m ==1) return $arr;
 
         if ($m == count($arr)){
@@ -200,13 +200,13 @@ class ArrayHelper {
             return $result;
         }
 
-        $temp_firstelement = $arr[0];
+        $tempFirstelement = $arr[0];
         unset($arr[0]);
         $arr = array_values($arr);
         $temp_list1 = self::_combination($arr, ($m-1), $separator);
 
         foreach ($temp_list1 as $s){
-            $s = $temp_firstelement. $separator. $s;
+            $s = $tempFirstelement. $separator. $s;
             $result[] = $s;
         }
 
@@ -276,7 +276,7 @@ class ArrayHelper {
      */
     public static function arraySearchMutilItem(&$data = [], $condition = [], $delSource=false) {
         if (empty($data)) return false;
-        $res = array();
+        $res = [];
         $match = count($condition);
         foreach ($data as $j=>$item) {
             $check = 0;

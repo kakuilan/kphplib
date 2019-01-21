@@ -209,23 +209,23 @@ class FileHelper {
      * @param bool $overwrite 是否覆盖
      * @return bool
      */
-    public static function createZip($files = array(),$destination = '',$overwrite = false) {
+    public static function createZip($files = [], $destination = '', $overwrite = false) {
         //if the zip file already exists and overwrite is false, return false
         if(file_exists($destination) && !$overwrite) { return false; }
         //vars
-        $valid_files = array();
+        $validFiles = [];
         //if files were passed in...
         if(is_array($files)) {
             //cycle through each file
             foreach($files as $file) {
                 //make sure the file exists
                 if(file_exists($file)) {
-                    $valid_files[] = $file;
+                    $validFiles[] = $file;
                 }
             }
         }
         //if we have good files...
-        if(count($valid_files)) {
+        if(count($validFiles)) {
             //create the archive
             $zip = new \ZipArchive();
             if($zip->open($destination,$overwrite ? \ZIPARCHIVE::OVERWRITE : \ZIPARCHIVE::CREATE) !== true) {
@@ -234,7 +234,7 @@ class FileHelper {
 
             //add the files
             $desPath = dirname($destination);
-            foreach($valid_files as $file) {
+            foreach($validFiles as $file) {
                 $localname = str_replace($desPath, '', $file);
                 $zip->addFile($file,$localname);
             }
@@ -273,14 +273,14 @@ class FileHelper {
 
         //中文名处理
         if(empty($ua)) $ua = $_SERVER["HTTP_USER_AGENT"] ?? '';
-        $encoded_filename = urlencode($fileName);
-        $encoded_filename = str_replace("+", "%20", $encoded_filename);
+        $encodedFilename = urlencode($fileName);
+        $encodedFilename = str_replace("+", "%20", $encodedFilename);
 
         ob_end_clean();
         header("Content-Encoding: none");
         header("Content-Type: ".(strpos($ua, 'MSIE') ? 'application/octetstream' : 'application/octet-stream'));
         if (preg_match("/MSIE/", $ua)) {
-            header('Content-Disposition: attachment; filename="' . $encoded_filename . '"');
+            header('Content-Disposition: attachment; filename="' . $encodedFilename . '"');
         } else if (preg_match("/Firefox/", $ua)) {
             header('Content-Disposition: attachment; filename*="utf8\'\'' . $fileName . '"');
         } else {

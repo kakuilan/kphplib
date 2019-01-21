@@ -39,27 +39,27 @@ class EncryptHelper {
      * @param string $string 待操作字符串
      * @param string $operation 操作类型:DECODE 解密, ENCODE 加密
      * @param string $key 密钥
-     * @param int $expiry 有效期
+     * @param int $expiry 有效期/秒,0为不限制
      * @return string
      */
     public static function ucAuthcode($string='', $operation = 'DECODE', $key = '', $expiry = 0) {
-        $ckey_length = 4;
+        $ckeyLength = 4;
 
         $key = md5($key ? $key : 'LKK');
         $keya = md5(substr($key, 0, 16));
         $keyb = md5(substr($key, 16, 16));
-        $keyc = $ckey_length ? ($operation == 'DECODE' ? substr($string, 0, $ckey_length) : substr(md5(microtime()), -$ckey_length)) : '';
+        $keyc = $ckeyLength ? ($operation == 'DECODE' ? substr($string, 0, $ckeyLength) : substr(md5(microtime()), -$ckeyLength)) : '';
 
         $cryptkey = $keya.md5($keya.$keyc);
         $key_length = strlen($cryptkey);
 
-        $string = $operation == 'DECODE' ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? $expiry + time() : 0).substr(md5($string.$keyb), 0, 16).$string;
+        $string = $operation == 'DECODE' ? base64_decode(substr($string, $ckeyLength)) : sprintf('%010d', $expiry ? $expiry + time() : 0).substr(md5($string.$keyb), 0, 16).$string;
         $string_length = strlen($string);
 
         $result = '';
         $box = range(0, 255);
 
-        $rndkey = array();
+        $rndkey = [];
         for($i = 0; $i <= 255; $i++) {
             $rndkey[$i] = ord($cryptkey[$i % $key_length]);
         }
@@ -161,8 +161,7 @@ class EncryptHelper {
         $l		=	strlen($key);
         $str = $char   = '';
         for ($i = 0; $i < $len; $i++) {
-            if ($x == $l)
-            {
+            if ($x == $l) {
                 $x = 0;
             }
             $char .= $key{$x};
@@ -199,12 +198,9 @@ class EncryptHelper {
             $x++;
         }
         for ($i = 0; $i < $len; $i++) {
-            if (ord(substr($data, $i, 1)) < ord(substr($char, $i, 1)))
-            {
+            if (ord(substr($data, $i, 1)) < ord(substr($char, $i, 1))) {
                 $str .= chr((ord(substr($data, $i, 1)) + 256) - ord(substr($char, $i, 1)));
-            }
-            else
-            {
+            }else {
                 $str .= chr(ord(substr($data, $i, 1)) - ord(substr($char, $i, 1)));
             }
         }

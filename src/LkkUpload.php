@@ -95,7 +95,7 @@ class LkkUpload {
      * @param string $newName 新文件名
      * @param array $params 上传参数
      */
-    public function upload($inputName, $newName='', $params = array()) {
+    public function upload($inputName, $newName='', $params = []) {
         $this->parseParams($params);
         $this->fileInfo = array('inputName'=>$inputName, 'newName'=>$newName); //newName包含扩展名
 

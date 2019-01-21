@@ -9,11 +9,11 @@
 
 namespace Lkk;
 
-use JsonSerializable;
-use ReflectionProperty;
-use ReflectionClass;
 use Closure;
 use Exception;
+use JsonSerializable;
+use ReflectionClass;
+use ReflectionProperty;
 
 
 class LkkObject implements JsonSerializable {

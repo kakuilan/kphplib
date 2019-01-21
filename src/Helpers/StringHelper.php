@@ -359,10 +359,11 @@ class StringHelper {
      * @return array|bool
      */
     public static function matchImages($content = '') {
+        if(empty($content)) return false;
         preg_match_all ( '/<img.*src=(.*)[>|\\s]/iU', $content, $src);
-        if (count ( $src [1] ) > 0) {
+        if (count ( $src[1] ) > 0) {
             $images = [];
-            foreach ( $src [1] as $v ) {
+            foreach ( $src[1] as $v ) {
                 $images[] = trim ( $v, "\"'" ); //删除首尾的引号 ' "
             }
             return $images;
@@ -379,6 +380,7 @@ class StringHelper {
      * @return mixed
      */
     public static function br2nl($string='') {
+        if(empty($string)) return '';
         return @preg_replace('/\<br(\s*)?\/?\>/i', "\n", $string);
     }
 
@@ -389,6 +391,7 @@ class StringHelper {
      * @return mixed|string
      */
     public static function removeSpace($str=''){
+        if(empty($str)) return '';
         $str =  str_replace([chr(13), chr(10), "\n", "\r", "\t", '  '],'', $str);
         $str = str_replace('&nbsp;','', $str);
         $str = preg_replace("/\s|　/i","",$str);
@@ -402,6 +405,7 @@ class StringHelper {
      * @return mixed|string
      */
     public static function getText($string='') {
+        if(empty($string)) return '';
         $string = strip_tags($string);
 
         //移除html,js,css标签
@@ -452,6 +456,7 @@ class StringHelper {
      * @return mixed|string
      */
     public static function removeHtml($str=''){
+        if(empty($str)) return '';
         $str=preg_replace( "@<(.*?)>@is", "", $str); //过滤标签
         $str=preg_replace("/<\s*img\s+[^>]*?src\s*=\s*(\'|\")(.*?)\\1[^>]*?\/?\s*>/i", "", $str); //过滤img标签
         $str=preg_replace("@<style(.*?)<\/style>@is", "", $str); //过滤css

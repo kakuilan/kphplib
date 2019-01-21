@@ -10,9 +10,6 @@
 
 namespace Lkk\Helpers;
 
-use Lkk\Helpers\ArrayHelper;
-use Lkk\Helpers\StringHelper;
-
 class CommonHelper {
 
 
@@ -52,7 +49,7 @@ class CommonHelper {
         }elseif ( ($fp = fopen($file, 'w+')) === false) {
             return false;
         }
-        fclose($fp);
+        @fclose($fp);
 
         return true;
     }
@@ -138,66 +135,66 @@ class CommonHelper {
 
     /**
      * 获取浏览器信息
-     * @param bool $returnAll 是否返回所有信息:否-只返回浏览器名称;是-返回相关数组
-     * @param string $u_agent 客户端信息
+     * @param bool $returnAll 是否返回所有信息:false-只返回浏览器名称;true-返回相关数组
+     * @param string $userAgent 客户端信息
      * @return array|string
      */
-    public static function getBrowser($returnAll=false, $u_agent=null){
-        if(empty($u_agent)) $u_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    public static function getBrowser($returnAll=false, $userAgent=null){
+        if(empty($userAgent)) $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
         $bname = 'Unknown';
         $platform = 'Unknown';
         $version= "";
 
         //First get the platform?
-        if (preg_match('/linux/i', $u_agent)) {
+        if (preg_match('/linux/i', $userAgent)) {
             $platform = 'Linux';
-        }elseif (preg_match('/macintosh|mac os x/i', $u_agent)) {
+        }elseif (preg_match('/macintosh|mac os x/i', $userAgent)) {
             $platform = 'MAC';
-        }elseif (preg_match('/windows|win32/i', $u_agent)) {
+        }elseif (preg_match('/windows|win32/i', $userAgent)) {
             $platform = 'Windows';
-        }elseif (preg_match('/unix/i',$u_agent)) {
+        }elseif (preg_match('/unix/i',$userAgent)) {
             $platform = 'Unix';
-        }elseif (preg_match('/bsd/i',$u_agent)) {
+        }elseif (preg_match('/bsd/i',$userAgent)) {
             $platform = 'BSD';
-        }elseif (preg_match('/iPhone/i',$u_agent)) {
+        }elseif (preg_match('/iPhone/i',$userAgent)) {
             $platform = 'iPhone';
-        }elseif (preg_match('/iPad/i',$u_agent)) {
+        }elseif (preg_match('/iPad/i',$userAgent)) {
             $platform = 'iPad';
-        }elseif (preg_match('/iPod/i',$u_agent)) {
+        }elseif (preg_match('/iPod/i',$userAgent)) {
             $platform = 'iPod';
-        }elseif (preg_match('/android/i',$u_agent)) {
+        }elseif (preg_match('/android/i',$userAgent)) {
             $platform = 'Android';
         }
 
         // Next get the name of the useragent yes seperately and for good reason
-        if((preg_match('/MSIE/i',$u_agent) || strpos($u_agent,'rv:11.0')) && !preg_match('/Opera/i',$u_agent)) {
+        if((preg_match('/MSIE/i',$userAgent) || strpos($userAgent,'rv:11.0')) && !preg_match('/Opera/i',$userAgent)) {
             $bname = 'Internet Explorer';
             $ub = "MSIE";
-        }elseif(preg_match('/Firefox/i',$u_agent)) {
+        }elseif(preg_match('/Firefox/i',$userAgent)) {
             $bname = 'Mozilla Firefox';
             $ub = "Firefox";
-        }elseif(preg_match('/Edge/i',$u_agent)) {//win10 Edge浏览器 添加了chrome内核标记 在判断Chrome之前匹配
+        }elseif(preg_match('/Edge/i',$userAgent)) {//win10 Edge浏览器 添加了chrome内核标记 在判断Chrome之前匹配
             $bname = 'Microsoft Edge';
             $ub = "Edge";
-        }elseif(preg_match('/Chrome/i',$u_agent)) {
+        }elseif(preg_match('/Chrome/i',$userAgent)) {
             $bname = 'Google Chrome';
             $ub = "Chrome";
-        }elseif(preg_match('/Safari/i',$u_agent)) {
+        }elseif(preg_match('/Safari/i',$userAgent)) {
             $bname = 'Apple Safari';
             $ub = "Safari";
-        }elseif(preg_match('/Opera/i',$u_agent)) {
+        }elseif(preg_match('/Opera/i',$userAgent)) {
             $bname = 'Opera';
             $ub = "Opera";
-        }elseif(preg_match('/Netscape/i',$u_agent)) {
+        }elseif(preg_match('/Netscape/i',$userAgent)) {
             $bname = 'Netscape';
             $ub = "Netscape";
-        }elseif(preg_match('/Maxthon/i',$u_agent)) {
+        }elseif(preg_match('/Maxthon/i',$userAgent)) {
             $bname = 'Maxthon';
             $ub = "Maxthon";
-        }elseif(preg_match('/Lynx/i',$u_agent)) {
+        }elseif(preg_match('/Lynx/i',$userAgent)) {
             $bname = 'Lynx';
             $ub = "Lynx";
-        }elseif(preg_match('/w3m/i',$u_agent)) {
+        }elseif(preg_match('/w3m/i',$userAgent)) {
             $bname = 'w3m';
             $ub = "w3m";
         }
@@ -205,7 +202,7 @@ class CommonHelper {
         // finally get the correct version number
         $known = array('Version', $ub, 'other');
         $pattern = '#(?<browser>' . join('|', $known) . ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
-        if (!preg_match_all($pattern, $u_agent, $matches)) {
+        if (!preg_match_all($pattern, $userAgent, $matches)) {
             // we have no matching number just continue
         }
 
@@ -214,7 +211,7 @@ class CommonHelper {
         if ($i != 1) {
             //we will have two since we are not using 'other' argument yet
             //see if version is before or after the name
-            if (strripos($u_agent,"Version") < strripos($u_agent,$ub)){
+            if (strripos($userAgent,"Version") < strripos($userAgent,$ub)){
                 $version= $matches['version'][0];
             }
             else {
@@ -228,7 +225,7 @@ class CommonHelper {
         // check if we have a number
         if ($version==null || $version=="") {$version="?";}
         $res = array(
-            'userAgent' => $u_agent,	//用户客户端信息
+            'userAgent' => $userAgent,	//用户客户端信息
             'name'      => $bname,		//浏览器名称
             'version'   => $version,	//浏览器版本
             'platform'  => $platform,	//使用平台
@@ -242,25 +239,25 @@ class CommonHelper {
 
     /**
      * 获取客户端操作系统
-     * @param string $u_agent 客户端信息
+     * @param string $userAgent 客户端信息
      * @return string
      */
-    public static function getClientOS($u_agent=null) {
-        if(empty($u_agent)) $u_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    public static function getClientOS($userAgent=null) {
+        if(empty($userAgent)) $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
         $OS = 'Unknown';
-        if (preg_match('/win/i',$u_agent)) {
+        if (preg_match('/win/i',$userAgent)) {
             $OS = 'Windows';
-        }elseif (preg_match('/mac/i',$u_agent)) {
+        }elseif (preg_match('/mac/i',$userAgent)) {
             $OS = 'MAC';
-        }elseif (preg_match('/linux/i',$u_agent)) {
+        }elseif (preg_match('/linux/i',$userAgent)) {
             $OS = 'Linux';
-        }elseif (preg_match('/unix/i',$u_agent)) {
+        }elseif (preg_match('/unix/i',$userAgent)) {
             $OS = 'Unix';
-        }elseif (preg_match('/bsd/i',$u_agent)) {
+        }elseif (preg_match('/bsd/i',$userAgent)) {
             $OS = 'BSD';
-        }elseif (preg_match('/iPhone|iPad|iPod/i',$u_agent)) {
+        }elseif (preg_match('/iPhone|iPad|iPod/i',$userAgent)) {
             $OS = 'iOS';
-        }elseif (preg_match('/android/i',$u_agent)) {
+        }elseif (preg_match('/android/i',$userAgent)) {
             $OS = 'Android';
         }
 
@@ -298,23 +295,23 @@ class CommonHelper {
 
         static $other_list = array('htc','ipod','palm','openwave','nexus one','Cellphone','Xphone','kindle','mmp','pocket','ppc','sqh','spv','treo','vodafone');
 
-        $useragent = strtolower($server['HTTP_USER_AGENT']);
+        $userAgent = strtolower($server['HTTP_USER_AGENT']);
 
-        if(ArrayHelper::dstrpos($useragent, $pad_list)) {
+        if(ArrayHelper::dstrpos($userAgent, $pad_list)) {
             return false;
         }
-        if(($v = ArrayHelper::dstrpos($useragent, $touchbrowser_list, true))){
+        if(($v = ArrayHelper::dstrpos($userAgent, $touchbrowser_list, true))){
             return 3;
         }
-        if(($v = ArrayHelper::dstrpos($useragent, $wmlbrowser_list))) {
+        if(($v = ArrayHelper::dstrpos($userAgent, $wmlbrowser_list))) {
             return 2; //wml版
         }
-        if(($v = ArrayHelper::dstrpos($useragent, $other_list, true))){
+        if(($v = ArrayHelper::dstrpos($userAgent, $other_list, true))){
             return 1;
         }
 
         $brower = array('mozilla', 'chrome', 'safari', 'opera', 'm3gate', 'winwap', 'openwave', 'myop');
-        if(ArrayHelper::dstrpos($useragent, $brower)) return false;
+        if(ArrayHelper::dstrpos($userAgent, $brower)) return false;
 
         return false;
     }
@@ -353,7 +350,7 @@ class CommonHelper {
         }
 
         preg_match("/[\d\.]{7,15}/", $ip, $ipmatches);
-        $ip = isset($ipmatches[0]) ? $ipmatches[0] : '0.0.0.0';
+        $ip = $ipmatches[0] ?? '0.0.0.0';
 
         return $ip;
     }
@@ -395,7 +392,7 @@ class CommonHelper {
      */
     public static function getDomain($url='', $firstLevel=false, $server=null){
         if(empty($server)) $server = $_SERVER;
-        if(empty($url)) $url = isset($server['HTTP_HOST']) ? $server['HTTP_HOST'] : '';
+        if(empty($url)) $url = $server['HTTP_HOST'] ?? '';
 
         if(!stripos($url, '://')) $url = 'http://' .$url;
         $parse = parse_url(strtolower($url));
@@ -421,12 +418,12 @@ class CommonHelper {
      */
     public static function getUrl($server=null) {
         if(empty($server)) $server = $_SERVER;
-        $sys_protocal = isset($server['SERVER_PORT']) && $server['SERVER_PORT'] == '443' ? 'https://' : 'http://';
-        $php_self = $server['PHP_SELF'] ? $server['PHP_SELF'] : $server['SCRIPT_NAME'];
-        $path_info = isset($server['PATH_INFO']) ? $server['PATH_INFO'] : '';
-        $relate_url = isset($server['REQUEST_URI']) ? $server['REQUEST_URI'] :
-            $php_self.(isset($server['QUERY_STRING']) ? '?'.$server['QUERY_STRING'] : $path_info);
-        return $sys_protocal.(isset($server['HTTP_HOST']) ? $server['HTTP_HOST'] : '').$relate_url;
+        $sysProtocal = ($server['SERVER_PORT'] ?? '')  == '443' ? 'https://' : 'http://';
+        $phpSelf = $server['PHP_SELF'] ?? $server['SCRIPT_NAME'];
+        $pathInfo = $server['PATH_INFO'] ?? '';
+        $relateUrl = $server['REQUEST_URI'] ??
+            $phpSelf. (isset($server['QUERY_STRING']) ? '?'.$server['QUERY_STRING'] : $pathInfo);
+        return $sysProtocal. ($server['HTTP_HOST'] ?? '') .$relateUrl;
     }
 
 
@@ -458,6 +455,7 @@ class CommonHelper {
      * @return mixed|string
      */
     public static function htmltagConvert($content, $nl2br = true) {
+        if(empty($content)) return '';
         $content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
         if ($nl2br) {
             $content = nl2br($content);
@@ -475,6 +473,8 @@ class CommonHelper {
      * @return mixed|string
      */
     public static function replaceSQLEval($str='') {
+        if(empty($str)) return '';
+
         $sql = ['add ', 'and ', 'count ', 'order ', 'table ', 'create ', 'delete ', 'drop ', 'from ', 'grant ', 'insert ', 'select ', 'truncate ', 'update ', 'use ', 'union ', 'where ', 'alert ', 'execute ', 'master ', 'declare ', 'show ', 'outfile ', 'group_concat', 'column_name', 'information_schema.columns', 'table_schema'];
 
         $eval = ['eval', 'exec', 'passthru', 'proc_open', 'shell_exec', 'system', '$$', 'include', 'require', 'assert'];
@@ -498,6 +498,8 @@ class CommonHelper {
      * @return string
      */
     public static function filterString($string) {
+        if(empty($string)) return '';
+
         $string = str_replace('%20','',$string);
         $string = str_replace('%27','',$string);
         $string = str_replace('%2527','',$string);
