@@ -629,6 +629,24 @@ class StringHelper {
     }
 
 
+    /**
+     * 多分隔符切割字符串
+     * @param array $delimiters 分隔符数组
+     * @param string $string 字符串
+     * @return array
+     */
+    public static function multiExplode(array $delimiters, string $string) {
+        if(empty($delimiters) || empty($string)) return [];
+
+        if(count($delimiters)>1) {
+            $string = str_replace($delimiters, $delimiters[0], $string);
+        }
+
+        $res = explode($delimiters[0], $string);
+        return $res;
+    }
+
+
 
 
 }
