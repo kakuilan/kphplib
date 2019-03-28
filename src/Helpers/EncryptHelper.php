@@ -99,7 +99,7 @@ class EncryptHelper {
      * @param bool $unsign 是否返回无符号值 true:返回11位无符号整数, false:返回10位有符号整数
      * @return int
      */
-    public static function murmurhash3_int($key, $seed=0, $unsign=true){
+    public static function murmurhash3_int($key, $seed=3, $unsign=true){
         $key  = array_values(unpack('C*',(string) $key));
         $klen = count($key);
         $h1   = (int)$seed;
