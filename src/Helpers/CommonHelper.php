@@ -635,6 +635,16 @@ class CommonHelper {
     }
 
 
+    /**
+     * md5短串(返回16位md5值)
+     * @param $str
+     * @return bool|string
+     */
+    public static function md5Short($str) {
+        return substr(md5(strval($str)), 8, 16);
+    }
+
+
 
 
 }
