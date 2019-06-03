@@ -152,17 +152,20 @@ class ValidateHelper {
     /**
      * 是否整数
      * @param $val
+     * @param bool $bigInt 是否大整数
      * @return bool|int
      */
-    public static function isInteger($val) {
-        if (!is_scalar($val) || is_bool($val)) {
-            return false;
-        }
-        if (is_numeric($val) && is_float($val + 0) && ($val + 0) > PHP_INT_MAX) {
+    public static function isInteger($val, $bigInt=false) {
+        if (!is_scalar($val) || is_bool($val) || !is_numeric($val) || is_float($val)) {
             return false;
         }
 
-        return is_float($val) ? false : preg_match(self::$patternInteger, $val);
+        //php范围内的整数
+        if (!$bigInt && is_float($val + 0) && ($val + 0) > PHP_INT_MAX) {
+            return false;
+        }
+
+        return preg_match(self::$patternInteger, $val);
     }
 
 
