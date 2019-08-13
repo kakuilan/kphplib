@@ -22,7 +22,7 @@ class DirectoryHelper {
         if(empty($dir)) return false;
         if(is_dir($dir) && chmod($dir, $mode)) {
             return true;
-        } elseif (mkdir($dir, $mode, true)) {//第三个参数为true即可以创建多级目录
+        } elseif (@mkdir($dir, $mode, true)) {//第三个参数为true即可以创建多级目录
             return true;
         }
 
