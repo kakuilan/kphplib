@@ -447,6 +447,7 @@ class StringHelper {
 
         $string = preg_replace($search, $replace, $string);
         $string = self::removeSpace($string);
+        $string = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
 
         return trim($string);
     }

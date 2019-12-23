@@ -79,7 +79,7 @@ class LkkObject implements JsonSerializable {
      * @param mixed $value
      * @throws Exception
      */
-    public function set($name, $value) {
+    public function set($name, $value=null) {
         $methodName = 'set' . ucfirst($name);
         if ($this->__class->hasMethod($methodName) && ($method = $this->__class->getMethod($methodName)) && $method->isPublic() && !$method->isStatic()) {
             $method->invoke($this, $value);
