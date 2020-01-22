@@ -68,7 +68,7 @@ class DirectoryHelper {
      * @return array
      */
     public static function getFileTree($path='', $type='all', $recursive=true){
-        $path = rtrim($path, DS);
+        $path = rtrim($path, DIRECTORY_SEPARATOR);
         $tree = [];
         // '{.,*}*' 相当于 '.*'(搜索.开头的隐藏文件)和'*'(搜索正常文件)
         foreach(glob($path.'/{.,*}*', GLOB_BRACE) as $single){
