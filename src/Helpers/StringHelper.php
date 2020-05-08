@@ -326,7 +326,8 @@ class StringHelper {
         $firstchar_ord = ord(strtoupper($str{0}));
         if($firstchar_ord >= 65 and $firstchar_ord <= 91) return strtoupper($str{0});
         if($firstchar_ord >= 48 and $firstchar_ord <= 57) return '#';
-        $s = iconv("UTF-8", "gb2312", $str);
+        //$s = @iconv("UTF-8", "gb2312", $str);
+        $s = @mb_convert_encoding($str, 'gb2312');
         $asc = ord($s{0}) * 256 + ord($s{1}) - 65536;
         if($asc>=-20319 and $asc<=-20284) return "A";
         if($asc>=-20283 and $asc<=-19776) return "B";
